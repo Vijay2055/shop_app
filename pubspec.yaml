@@ -51,6 +51,8 @@ dependencies:
   sqlite3_flutter_libs: ^0.6.0+eol
   barcode_widget: ^2.0.4
   shared_preferences: ^2.5.5
+  data_table_2: ^2.7.2
+  freezed_annotation: ^3.1.0
   
 dev_dependencies:
   flutter_test:
@@ -64,6 +66,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  freezed: ^3.2.5
+  json_serializable: ^6.14.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

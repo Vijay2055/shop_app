@@ -38,6 +38,13 @@ class Sidebar extends StatelessWidget {
 
           _buildItem(
             context,
+            title: "Barcode",
+            route: Pages.barcodelist,
+            currentLocation: currentLocation,
+          ),
+
+          _buildItem(
+            context,
             title: "History",
             route: Pages.history,
             currentLocation: currentLocation,
