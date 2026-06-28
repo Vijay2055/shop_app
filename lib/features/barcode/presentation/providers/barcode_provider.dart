@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shop_app/core/utils/constants.dart';
-import 'package:shop_app/features/barcode/domain/barcode_item.dart';
+import 'package:shop_app/features/barcode/domain/entity/barcode_item.dart';
 import 'package:shop_app/features/barcode/presentation/view_states/barcode_state.dart';
 import 'package:shop_app/features/product/domain/entities/product.dart';
 
@@ -99,11 +99,7 @@ class BarcodeNotifier extends Notifier<BarcodeState> {
     return state.items.fold(0, (sum, item) => sum + item.quantity);
   }
 
-  void changeLayout(
-  BarcodeLayout layout,
-) {
-  state = state.copyWith(
-    layout: layout,
-  );
-}
+  void changeLayout(BarcodeLayout layout) {
+    state = state.copyWith(layout: layout);
+  }
 }

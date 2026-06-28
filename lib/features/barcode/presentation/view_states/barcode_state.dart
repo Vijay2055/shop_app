@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:shop_app/core/utils/constants.dart';
-import 'package:shop_app/features/barcode/domain/barcode_item.dart';
+import 'package:shop_app/features/barcode/domain/entity/barcode_item.dart';
 
 
 part 'barcode_state.freezed.dart';

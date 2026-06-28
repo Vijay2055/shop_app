@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shop_app/app/pages.dart';
-import 'package:shop_app/app/router.dart';
 import 'package:shop_app/core/utils/constants.dart';
 import 'package:shop_app/features/barcode/presentation/providers/barcode_provider.dart';
 import 'package:shop_app/features/barcode/services/barcode_pdf_service.dart';
