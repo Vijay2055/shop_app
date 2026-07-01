@@ -1,122 +1,164 @@
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shop_app/core/database/app_database.dart';
-import 'package:shop_app/features/product/data/models/product_model.dart';
+import 'package:shop_app/core/database/providers/app_database_provider.dart';
 
-class ProductLocalDataSource {
-  final AppDatabase db;
+abstract class ProductLocalDataSource {
+  // Product
+  Future<List<Product>> getProducts();
 
-  ProductLocalDataSource(this.db);
+  Future<Product?> getProductById(String id);
 
-  Future<List<ProductModel>> getProducts() async {
-    try {
-      final data = await db.getProducts();
-      return data.map(_toModel).toList();
-    } catch (e) {
-      throw Exception("Database error $e");
-    }
-  }
+  Future<void> addProduct(ProductsCompanion product);
 
-  Future<void> add(ProductModel product) async {
-    try {
-      await db
-          .into(db.products)
-          .insert(
-            ProductsCompanion.insert(
-              id: product.id,
-              name: product.name,
-              price: product.price,
-              stock: product.stock,
-              barcode: product.barcode,
-              categoryId: product.categoryId,
-            ),
-          );
-    } on SqliteException catch (e) {
-      // 🔴 UNIQUE constraint violation (duplicate barcode)
-      if (e.extendedResultCode == 2067 || e.message.contains("UNIQUE")) {
-        throw Exception("DUPLICATE_BARCODE");
+  Future<void> updateProduct(Product product);
+
+  Future<void> deleteProduct(String id);
+
+  Future<List<Product>> searchProducts(String query);
+
+  // Variant
+  Future<List<ProductVariant>> getVariants(String productId);
+
+  Future<ProductVariant?> getVariantById(String id);
+
+  Future<void> addVariant(ProductVariantsCompanion variant);
+
+  Future<void> updateVariant(ProductVariant variant);
+
+  Future<void> deleteVariant(String id);
+
+  Future<ProductVariant?> findByBarcode(String barcode);
+
+  Future<ProductVariant?> findBySku(String sku);
+
+  Future<void> addProductWithVariant(
+    ProductsCompanion product,
+    List<ProductVariantsCompanion> variants,
+  );
+}
+
+class ProductLocalDataSourceImpl implements ProductLocalDataSource {
+  final AppDatabase _database;
+
+  ProductLocalDataSourceImpl(this._database);
+
+  //==========================================================
+  // add product with PRODUCT
+  //==========================================================
+
+  @override
+  Future<void> addProductWithVariant(
+    ProductsCompanion product,
+    List<ProductVariantsCompanion> variants,
+  ) async {
+    await _database.transaction(() async {
+      await _database
+          .into(_database.products)
+          .insert(product, mode: InsertMode.insertOrAbort);
+
+      for (final v in variants) {
+        await _database
+            .into(_database.productVariants)
+            .insert(v, mode: InsertMode.insertOrAbort);
       }
-
-      // 🔴 other SQLite errors
-      throw Exception("DATABASE_ERROR: ${e.message}");
-    } catch (e) {
-      // 🔴 unknown errors
-      throw Exception("UNKNOWN_ERROR: $e");
-    }
+    });
   }
 
-  Future<void> update(ProductModel product) async {
-    try {
-      await db.updateProduct(_toTable(product));
-    } catch (e) {
-      throw Exception("Database error $e");
-    }
+  //==========================================================
+  // PRODUCT
+  //==========================================================
+
+  @override
+  Future<List<Product>> getProducts() async {
+    return await _database.select(_database.products).get();
   }
 
-  Future<void> delete(String id) async {
-    try {
-      await db.deleteProduct(id);
-    } catch (e) {
-      throw Exception("Database error $e");
-    }
+  @override
+  Future<Product?> getProductById(String id) async {
+    return await (_database.select(
+      _database.products,
+    )..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
   }
 
-  Future<ProductModel?> findByBarcode(String barcode) async {
-    try {
-      final result = await db.findByBarcode(barcode);
-      return result != null ? _toModel(result) : null;
-    } catch (e) {
-      throw Exception("Database error $e");
-    }
+  @override
+  Future<void> addProduct(ProductsCompanion product) async {
+    await _database
+        .into(_database.products)
+        .insert(product, mode: InsertMode.insertOrAbort);
   }
 
-  Future<List<ProductModel>> search(String query) async {
-    try {
-      final result =
-          await (db.select(db.products)..where(
-                (tbl) =>
-                    tbl.name.like('%$query%') | tbl.barcode.like('%$query%'),
-              ))
-              .get();
-
-      return result.map(_toModel).toList();
-    } catch (e) {
-      throw Exception("Database search failed: $e");
-    }
+  @override
+  Future<void> updateProduct(Product product) async {
+    await _database.update(_database.products).replace(product);
   }
 
-  // -------- MAPPERS --------
-
-  ProductModel _toModel(Product data) {
-    return ProductModel(
-      id: data.id,
-      name: data.name,
-      barcode: data.barcode,
-      price: data.price,
-      stock: data.stock,
-      categoryId: data.categoryId,
-    );
+  @override
+  Future<void> deleteProduct(String id) async {
+    await (_database.delete(
+      _database.products,
+    )..where((tbl) => tbl.id.equals(id))).go();
   }
 
-  ProductsCompanion _toCompanion(ProductModel model) {
-    return ProductsCompanion.insert(
-      id: model.id,
-      name: model.name,
-      barcode: model.barcode,
-      price: model.price,
-      stock: model.stock,
-      categoryId: model.categoryId,
-    );
+  @override
+  Future<List<Product>> searchProducts(String query) async {
+    return await (_database.select(
+      _database.products,
+    )..where((tbl) => tbl.name.like('%$query%'))).get();
   }
 
-  Product _toTable(ProductModel model) {
-    return Product(
-      id: model.id,
-      name: model.name,
-      barcode: model.barcode,
-      price: model.price,
-      stock: model.stock,
-      categoryId: model.categoryId,
-    );
+  //==========================================================
+  // PRODUCT VARIANT
+  //==========================================================
+
+  @override
+  Future<List<ProductVariant>> getVariants(String productId) async {
+    return await (_database.select(
+      _database.productVariants,
+    )..where((tbl) => tbl.productId.equals(productId))).get();
+  }
+
+  @override
+  Future<ProductVariant?> getVariantById(String id) async {
+    return await (_database.select(
+      _database.productVariants,
+    )..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
+  }
+
+  @override
+  Future<void> addVariant(ProductVariantsCompanion variant) async {
+    await _database
+        .into(_database.productVariants)
+        .insert(variant, mode: InsertMode.insertOrAbort);
+  }
+
+  @override
+  Future<void> updateVariant(ProductVariant variant) async {
+    await _database.update(_database.productVariants).replace(variant);
+  }
+
+  @override
+  Future<void> deleteVariant(String id) async {
+    await (_database.delete(
+      _database.productVariants,
+    )..where((tbl) => tbl.id.equals(id))).go();
+  }
+
+  @override
+  Future<ProductVariant?> findByBarcode(String barcode) async {
+    return await (_database.select(
+      _database.productVariants,
+    )..where((tbl) => tbl.barcode.equals(barcode))).getSingleOrNull();
+  }
+
+  @override
+  Future<ProductVariant?> findBySku(String sku) async {
+    return await (_database.select(
+      _database.productVariants,
+    )..where((tbl) => tbl.sku.equals(sku))).getSingleOrNull();
   }
 }
+
+final productLocalDataSourceProvider = Provider<ProductLocalDataSource>(
+  (ref) => ProductLocalDataSourceImpl(ref.watch(appDatabaseProvider)),
+);

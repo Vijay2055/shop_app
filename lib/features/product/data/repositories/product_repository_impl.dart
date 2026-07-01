@@ -1,85 +1,220 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shop_app/core/errors/failure.dart';
 import 'package:shop_app/core/utils/result.dart';
 import 'package:shop_app/features/product/data/datasources/product_local_datasource.dart';
 import 'package:shop_app/features/product/data/models/product_model.dart';
-import 'package:shop_app/features/product/domain/entities/product.dart';
+import 'package:shop_app/features/product/data/models/product_variant_model.dart';
+import 'package:shop_app/features/product/domain/entities/product_entitiy.dart';
+import 'package:shop_app/features/product/domain/entities/product_variant_entity.dart';
 import 'package:shop_app/features/product/domain/repositories/product_repository.dart';
 
 class ProductRepositoryImpl implements ProductRepository {
-  final ProductLocalDataSource dataSource;
+  final ProductLocalDataSource _localDataSource;
 
-  ProductRepositoryImpl(this.dataSource);
+  ProductRepositoryImpl(this._localDataSource);
+
+  //==========================================================
+  // Product
+  //==========================================================
 
   @override
-  Future<Result<List<Product>>> getProducts() async {
+  Future<Result<List<ProductEntity>>> getProducts() async {
     try {
-      final data = await dataSource.getProducts();
-      return Result.success(data);
+      final rows = await _localDataSource.getProducts();
+
+      final products = rows.map((e) => e.toModel().toEntity()).toList();
+
+      return Success(products);
     } catch (e) {
-      return Result.failure(DatabaseFailure(e.toString()));
+      return FailureResult(DatabaseFailure(e.toString()));
     }
   }
 
   @override
-  Future<Result<void>> addProduct(Product product) async {
+  Future<Result<ProductEntity?>> getProductById(String id) async {
     try {
-      await dataSource.add(_toModel(product));
-      return Result.success(null);
+      final row = await _localDataSource.getProductById(id);
+
+      return Success(row?.toModel().toEntity());
     } catch (e) {
-      return Result.failure(DatabaseFailure(e.toString()));
+      return FailureResult(DatabaseFailure(e.toString()));
     }
   }
 
   @override
-  Future<Result<void>> updateProduct(Product product) async {
+  Future<Result<List<ProductEntity>>> searchProducts(String query) async {
     try {
-      await dataSource.update(_toModel(product));
-      return Result.success(null);
+      final rows = await _localDataSource.searchProducts(query);
+
+      final products = rows.map((e) => e.toModel().toEntity()).toList();
+
+      return Success(products);
     } catch (e) {
-      return Result.failure(DatabaseFailure(e.toString()));
+      return FailureResult(DatabaseFailure(e.toString()));
     }
   }
 
   @override
-  Future<Result<void>> deleteProduct(String id) async {
+  Future<Result<void>> addProduct(ProductEntity product) async {
     try {
-      await dataSource.delete(id);
-      return Result.success(null);
+      final model = ProductModel.fromEntity(product);
+
+      await _localDataSource.addProduct(model.toCompanion());
+
+      return const Success(null);
     } catch (e) {
-      return Result.failure(DatabaseFailure(e.toString()));
+      return FailureResult(DatabaseFailure(e.toString()));
     }
   }
 
   @override
-  Future<Result<Product?>> findByBarcode(String barcode) async {
+  Future<Result<void>> updateProduct(ProductEntity product) async {
     try {
-      final data = await dataSource.findByBarcode(barcode);
-      return Result.success(data);
+      final model = ProductModel.fromEntity(product);
+
+      await _localDataSource.updateProduct(model.toDrift());
+
+      return const Success(null);
     } catch (e) {
-      return Result.failure(DatabaseFailure(e.toString()));
+      return FailureResult(DatabaseFailure(e.toString()));
     }
   }
 
   @override
-  Future<Result<List<Product>>> searchProducts(String query) async {
+  Future<Result<void>> deleteProduct(String productId) async {
     try {
-      final data = await dataSource.search(query);
-      return Result.success(data);
+      await _localDataSource.deleteProduct(productId);
+
+      return const Success(null);
     } catch (e) {
-      return Result.failure(DatabaseFailure(e.toString()));
+      return FailureResult(DatabaseFailure(e.toString()));
     }
   }
 
-  // -------- Mapper --------
+  //==========================================================
+  // Variant
+  //==========================================================
 
-  ProductModel _toModel(Product product) {
-    return ProductModel(
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      stock: product.stock,
-      barcode: product.barcode,
-      categoryId: product.categoryId
-    );
+  @override
+  Future<Result<List<ProductVariantEntity>>> getVariants(
+    String productId,
+  ) async {
+    try {
+      final rows = await _localDataSource.getVariants(productId);
+
+      final variants = rows.map((e) => e.toModel().toEntity()).toList();
+
+      return Success(variants);
+    } catch (e) {
+      return FailureResult(DatabaseFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<ProductVariantEntity?>> getVariantById(String variantId) async {
+    try {
+      final row = await _localDataSource.getVariantById(variantId);
+
+      return Success(row?.toModel().toEntity());
+    } catch (e) {
+      return FailureResult(DatabaseFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> addVariant(ProductVariantEntity variant) async {
+    try {
+      final model = ProductVariantModel.fromEntity(variant);
+
+      await _localDataSource.addVariant(model.toCompanion());
+
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(DatabaseFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> updateVariant(ProductVariantEntity variant) async {
+    try {
+      final model = ProductVariantModel.fromEntity(variant);
+
+      await _localDataSource.updateVariant(model.toDrift());
+
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(DatabaseFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> deleteVariant(String variantId) async {
+    try {
+      await _localDataSource.deleteVariant(variantId);
+
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(DatabaseFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<ProductVariantEntity?>> findByBarcode(String barcode) async {
+    try {
+      final row = await _localDataSource.findByBarcode(barcode);
+
+      if (row == null) {
+        return FailureResult(DatabaseFailure('Product not found'));
+      }
+      if (row.stock <= 0) {
+        return FailureResult(DatabaseFailure('Product is out of stock'));
+      }
+
+      return Success(row.toModel().toEntity());
+    } catch (e) {
+      return FailureResult(DatabaseFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<ProductVariantEntity?>> findBySku(String sku) async {
+    try {
+      final row = await _localDataSource.findBySku(sku);
+
+      return Success(row?.toModel().toEntity());
+    } catch (e) {
+      return FailureResult(DatabaseFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> addProductWithVariant(
+    ProductEntity product,
+    List<ProductVariantEntity> variants,
+  ) async {
+    try {
+      final productModel = ProductModel.fromEntity(product);
+      final variantModels = variants
+          .map((v) => ProductVariantModel.fromEntity(v))
+          .toList();
+
+      final productCompanion = productModel.toCompanion();
+      final variantCompanions = variantModels
+          .map((v) => v.toCompanion())
+          .toList();
+
+      await _localDataSource.addProductWithVariant(
+        productCompanion,
+        variantCompanions,
+      );
+
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(DatabaseFailure(e.toString()));
+    }
   }
 }
+
+final productRepositoryProvider = Provider<ProductRepository>(
+  (ref) => ProductRepositoryImpl(ref.watch(productLocalDataSourceProvider)),
+);

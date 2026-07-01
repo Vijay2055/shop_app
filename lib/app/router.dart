@@ -33,24 +33,24 @@ class AppRouter {
             builder: (context, state) => HistoryScreen(),
           ),
 
-          GoRoute(
-            path: Pages.category,
-            builder: (context, state) => CategoryScreen(),
-          ),
+          // GoRoute(
+          //   path: Pages.category,
+          //   builder: (context, state) => CategoryScreen(),
+          // ),
 
-          GoRoute(
-            path: Pages.product,
-            builder: (context, state) => ProductScreen(),
-          ),
+          // GoRoute(
+          //   path: Pages.product,
+          //   builder: (context, state) => ProductScreen(),
+          // ),
           GoRoute(
             path: Pages.barcode,
             builder: (context, state) => BarcodePreviewScreen(),
           ),
 
-          GoRoute(
-            path: Pages.barcodelist,
-            builder: (context, state) => BarcodeProductList(),
-          ),
+          // GoRoute(
+          //   path: Pages.barcodelist,
+          //   builder: (context, state) => BarcodeProductList(),
+          // ),
 
           GoRoute(
             path: Pages.pdfPreview,

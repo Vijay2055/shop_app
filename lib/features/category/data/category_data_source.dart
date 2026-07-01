@@ -1,68 +1,71 @@
-import 'package:shop_app/features/category/domain/models/category_with_count.dart';
+// lib/features/category/data/datasources/category_local_data_source.dart
+
+import 'package:drift/drift.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shop_app/core/database/app_database.dart';
+import 'package:shop_app/core/database/providers/app_database_provider.dart';
 
-class CategoryLocalDataSource {
-  final AppDatabase db;
-
-  CategoryLocalDataSource(this.db);
-
-  // -------- GET ALL WITH COUNT --------
-  Future<List<CategoryWithCount>> getCategoriesWithCount() async {
-    try {
-      return await db.getCategoriesWithCount();
-    } catch (e) {
-      throw Exception("Database error: $e");
-    }
-  }
-
-  // -------- STREAM (BEST FOR UI) --------
-  Stream<List<CategoryWithCount>> watchCategoriesWithCount() {
-    try {
-      return db.watchCategoriesWithCount();
-    } catch (e) {
-      throw Exception("Stream error: $e");
-    }
-  }
-
-  // -------- ADD CATEGORY --------
-  Future<void> addCategory(String name) async {
-    try {
-      await db
-          .into(db.categories)
-          .insert(CategoriesCompanion.insert(id: _generateId(), name: name));
-    } catch (e) {
-      throw Exception("Insert category failed: $e");
-    }
-  }
-
-  // -------- DELETE CATEGORY --------
-  Future<void> deleteCategory(String id) async {
-    try {
-      await db.deleteCategory(id);
-    } catch (e) {
-      throw Exception("Delete category failed: $e");
-    }
-  }
-
-  // -------- SAFE DELETE (OPTIONAL - PRO LEVEL) --------
-  Future<void> deleteCategorySafe(String id) async {
-    try {
-      final products = await (db.select(
-        db.products,
-      )..where((p) => p.categoryId.equals(id))).get();
-
-      if (products.isNotEmpty) {
-        throw Exception("CATEGORY_NOT_EMPTY");
-      }
-
-      await db.deleteCategory(id);
-    } catch (e) {
-      throw Exception("Delete failed: $e");
-    }
-  }
-
-  // -------- HELPER --------
-  String _generateId() {
-    return DateTime.now().millisecondsSinceEpoch.toString();
-  }
+abstract class CategoryLocalDataSource {
+  Future<List<Category>> getAllCategories();
+  Future<void> insertCategory(CategoriesCompanion companion);
+  Future<void> deleteCategory(String id);
+  Future<void> updateCategory(String id,CategoriesCompanion companion);
 }
+
+class CategoryLocalDataSourceImpl implements CategoryLocalDataSource {
+  final AppDatabase _db;
+
+  CategoryLocalDataSourceImpl(this._db);
+
+  @override
+  Future<List<Category>> getAllCategories() async {
+    // Just return the raw Drift rows directly
+    return await _db.select(_db.categories).get();
+  }
+
+  @override
+  Future<void> insertCategory(CategoriesCompanion companion) async {
+    // Accept the companion directly from the repository
+    await _db
+        .into(_db.categories)
+        .insert(companion, mode: InsertMode.insertOrReplace);
+  }
+
+  @override
+  Future<void> deleteCategory(String id) async {
+    await (_db.delete(_db.categories)..where((tbl) => tbl.id.equals(id))).go();
+  }
+
+  // lib/features/category/data/datasources/category_local_data_source.dart
+
+@override
+Future<void> updateCategory(String id, CategoriesCompanion companion) async {
+  await (_db.update(_db.categories)..where((tbl) => tbl.id.equals(id)))
+      .write(companion);
+}
+
+  // Inside your CategoryLocalDataSource
+  // Future<List<CategoryWithCount>> getCategoriesWithCounts() {
+  //   final countColumn = products.id.count();
+
+  //   final query = select(categories).join([
+  //     leftOuterJoin(products, products.categoryId.equalsExp(categories.id)),
+  //   ]);
+
+  //   query.groupBy([categories.id]);
+
+  //   // Drift returns a typed wrapper containing the Category row and the calculated count
+  //   return query.map((row) {
+  //     return CategoryWithCount(
+  //       category: row.readTable(categories),
+  //       productCount: row.read(countColumn),
+  //     );
+  //   }).get();
+  // }
+}
+
+
+final categoryLocalDataSourceProvider = Provider<CategoryLocalDataSource>((ref) {
+  final db = ref.watch(appDatabaseProvider);
+  return CategoryLocalDataSourceImpl(db);
+});

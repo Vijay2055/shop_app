@@ -1,10 +1,17 @@
 import 'package:shop_app/core/errors/failure.dart';
-class Result<T> {
-  final T? data;
-  final Failure? error;
 
-  Result.success(this.data) : error = null;
-  Result.failure(this.error) : data = null;
+sealed class Result<T> {
+  const Result();
+}
 
-  bool get isSuccess => error == null;
+final class Success<T> extends Result<T> {
+  final T data;
+
+  const Success(this.data);
+}
+
+final class FailureResult<T> extends Result<T> {
+  final Failure failure;
+
+  const FailureResult(this.failure);
 }

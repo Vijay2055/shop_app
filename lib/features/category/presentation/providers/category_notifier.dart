@@ -1,34 +1,56 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shop_app/features/category/domain/models/category_with_count.dart';
-import 'package:shop_app/features/category/domain/repository/category_repository.dart';
-import 'package:shop_app/features/category/presentation/providers/categoryRepositoryProvider.dart';
+import 'package:shop_app/core/utils/result.dart';
+import 'package:shop_app/core/utils/result_provider.dart';
+import 'package:shop_app/features/category/domain/entity/category_entity.dart';
 
-class CategoryNotifier extends AsyncNotifier<List<CategoryWithCount>> {
-  CategoryRepository get repository => ref.read(categoryRepoProvider);
+import 'package:shop_app/features/category/presentation/view_holder/category_state.dart';
+import 'package:shop_app/features/category/providers/category_usecase_providers.dart';
 
+class CategoryNotifier extends AsyncNotifier<CategoryState> {
   @override
-  Future<List<CategoryWithCount>> build() async {
-    return await repository.getCategories();
+  Future<CategoryState> build() async {
+    return _loadCategories();
   }
 
-  // 🔥 RELOAD
   Future<void> refresh() async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      return await repository.getCategories();
-    });
+    ref.invalidateSelf();
   }
 
-  // 🔥 ADD CATEGORY
-  Future<void> addCategory(String name) async {
-    await repository.addCategory(name);
-    await refresh();
+  Future<CategoryState> _loadCategories() async {
+    state = const AsyncValue.loading();
+
+    final result = ref.read(getCategoriesUsecaseProvider);
+    final ans = await result.call();
+    switch (ans) {
+      case Success<List<CategoryEntity>> success:
+        final categories = success.data;
+        return CategoryState(categories: categories);
+
+      case FailureResult<List<CategoryEntity>> failure:
+        throw failure.failure;
+    }
   }
 
-  // 🔥 DELETE CATEGORY
-  Future<void> deleteCategory(String id) async {
-    await repository.deleteCategory(id);
-    await refresh();
+  Future<void> addCategory(CategoryEntity category) async {
+    final addCategory = ref.read(addCategoryUsecaseProvider);
+
+    final result = await addCategory(category);
+
+    switch (result) {
+      case Success():
+        ref.invalidateSelf();
+
+        ref
+            .read(resultProvider.notifier)
+            .showSuccess("Category added successfully");
+
+      case FailureResult(failure: final failure):
+        ref.read(resultProvider.notifier).showError(failure.message);
+    }
   }
 }
+
+final categoryProvider = AsyncNotifierProvider<CategoryNotifier, CategoryState>(
+  CategoryNotifier.new,
+);

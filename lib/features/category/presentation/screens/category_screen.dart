@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shop_app/app/pages.dart';
 import 'package:shop_app/core/utils/popup/add_product_dialogue.dart';
+import 'package:shop_app/core/utils/result_provider.dart';
+import 'package:shop_app/features/category/presentation/providers/category_notifier.dart';
 import 'package:shop_app/features/category/presentation/providers/category_provider.dart';
 import 'package:shop_app/features/product/presentation/providers/search_provider.dart';
 import 'package:shop_app/features/product/presentation/providers/selectedCategoryProvider.dart';
@@ -12,8 +14,25 @@ class CategoryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(categoryProvider);
+    final categoryState = ref.watch(categoryProvider);
 
+    ref.listen<ResultMessage?>(resultProvider, (previous, next) {
+      if (next == null) return;
+
+      final color = switch (next.type) {
+        ResultType.success => Colors.green,
+        ResultType.error => Colors.red,
+        ResultType.warning => Colors.orange,
+      };
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(next.message), backgroundColor: color),
+      );
+
+      ref.read(resultProvider.notifier).clear();
+    });
+
+  
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -45,25 +64,25 @@ class CategoryScreen extends ConsumerWidget {
           const SizedBox(height: 20),
 
           /// ================= QUICK STATS =================
-          state.when(
+          categoryState.when(
             data: (categories) {
-              final totalProducts = categories.fold<int>(
-                0,
-                (sum, c) => sum + c.productCount,
-              );
+              // final totalProducts = categories.fold<int>(
+              //   0,
+              //   (sum, c) => sum + c.productCount,
+              // );
 
               return Row(
                 children: [
                   _statCard(
                     title: "Categories",
-                    value: "${categories.length}",
+                    value: "10",
                     icon: Icons.category,
                     color: Colors.orange,
                   ),
                   const SizedBox(width: 16),
                   _statCard(
                     title: "Total Products",
-                    value: "$totalProducts",
+                    value: "0",
                     icon: Icons.inventory,
                     color: Colors.blue,
                   ),
@@ -85,10 +104,10 @@ class CategoryScreen extends ConsumerWidget {
 
           /// ================= CATEGORY LIST =================
           Expanded(
-            child: state.when(
+            child: categoryState.when(
               data: (categories) {
                 return GridView.builder(
-                  itemCount: categories.length + 2,
+                  itemCount: categories.categories.length + 2,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 4,
                     childAspectRatio: 1.2,
@@ -102,8 +121,8 @@ class CategoryScreen extends ConsumerWidget {
                         icon: Icons.dashboard,
                         color: Colors.blue,
                         onTap: () {
-                          ref.read(searchProvider.notifier).clear();
-                          ref.read(selectedCategoryProvider.notifier).clear();
+                          // ref.read(searchProvider.notifier).clear();
+                          // ref.read(selectedCategoryProvider.notifier).clear();
                           context.push(Pages.product);
                         },
                       );

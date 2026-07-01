@@ -1,11 +1,59 @@
-import 'package:shop_app/features/product/domain/entities/product.dart';
-import '../../../../core/utils/result.dart';
+import 'package:shop_app/core/utils/result.dart';
+import 'package:shop_app/features/product/domain/entities/product_entitiy.dart';
+import 'package:shop_app/features/product/domain/entities/product_variant_entity.dart';
 
 abstract class ProductRepository {
-  Future<Result<List<Product>>> getProducts();
-  Future<Result<void>> addProduct(Product product);
+
+  // ------------------------
+  // Product
+  // ------------------------
+
+  Future<Result<List<ProductEntity>>> getProducts();
+
+  Future<Result<ProductEntity?>> getProductById(String id);
+
+  Future<Result<List<ProductEntity>>> searchProducts(String query);
+
+  Future<Result<void>> addProduct(ProductEntity product);
+
+  Future<Result<void>> updateProduct(ProductEntity product);
+
   Future<Result<void>> deleteProduct(String productId);
-  Future<Result<void>> updateProduct(Product product);
-  Future<Result<Product?>> findByBarcode(String barcode);
-  Future<Result<List<Product>>> searchProducts(String query);
+
+  // ------------------------
+  // Product Variant
+  // ------------------------
+
+  Future<Result<List<ProductVariantEntity>>> getVariants(
+    String productId,
+  );
+
+  Future<Result<ProductVariantEntity?>> getVariantById(
+    String variantId,
+  );
+
+  Future<Result<void>> addVariant(
+    ProductVariantEntity variant,
+  );
+
+  Future<Result<void>> updateVariant(
+    ProductVariantEntity variant,
+  );
+
+  Future<Result<void>> deleteVariant(
+    String variantId,
+  );
+
+  Future<Result<ProductVariantEntity?>> findByBarcode(
+    String barcode,
+  );
+
+  Future<Result<ProductVariantEntity?>> findBySku(
+    String sku,
+  );
+
+  Future<Result<void>> addProductWithVariant(
+    ProductEntity product,
+    List<ProductVariantEntity> variants,
+  );
 }
