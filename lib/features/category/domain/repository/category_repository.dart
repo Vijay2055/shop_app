@@ -7,8 +7,9 @@ import 'package:shop_app/features/category/domain/entity/category_entity.dart';
 abstract class CategoryRepository {
   Future<Result<List<CategoryEntity>>> getCategories();
   Future<Result<void>> addCategory(CategoryEntity category);
-  Future<Result<void>> deleteCategory(String id);
+  Future<Result<void>> deleteCategory(int id);
   Future<Result<void>> updateCategory(CategoryEntity category);
+  Future<Result<CategoryEntity>> getCategoryById(int categoryId);
 }
 
 final categoryRepositoryProvider = Provider<CategoryRepository>((ref) {

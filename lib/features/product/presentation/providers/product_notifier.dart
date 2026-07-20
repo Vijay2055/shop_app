@@ -1,96 +1,94 @@
-// import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:async';
 
-// import 'package:shop_app/features/product/domain/entities/product.dart';
-// import 'package:shop_app/features/product/domain/repositories/product_repository.dart';
-// import 'package:shop_app/features/product/presentation/providers/ripository_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shop_app/core/utils/result.dart';
+import 'package:shop_app/features/product/domain/entities/product_entitiy.dart';
+import 'package:shop_app/features/product/presentation/state/product_state.dart';
+import 'package:shop_app/features/product/providers/usecase_providers.dart';
 
-// class ProductNotifier extends AsyncNotifier<List<Product>> {
-//   late final ProductRepository repository;
+class ProductNotifier extends AsyncNotifier<ProductState> {
+  @override
+  Future<ProductState> build() async {
+    return await _loadProduct(page: 1);
+  }
 
-//   @override
-//   Future<List<Product>> build() async {
-//     repository = ref.read(repositoryProvider);
-//     return _fetchProducts();
-//   }
+  Future<ProductState> _loadProduct({required int page}) async {
+    final productResult = await ref.read(getProductsUseCaseProvider)(
+      page: page,
+      limit: 3,
+    );
+    final countResult = await ref.read(getProductCountsUsecaseProvider)();
 
-//   /// 📦 FETCH PRODUCTS
-//   Future<List<Product>> _fetchProducts() async {
-//     final result = await repository.getProducts();
+    switch ((productResult, countResult)) {
+      case (
+        Success<List<ProductEntity>>(data: final data),
+        Success<int>(data: final total),
+      ):
+        return ProductState(
+          products: data,
+          currentPage: page,
+          pageSize: 3,
+          totalProducts: total,
+        );
 
-//     if (!result.isSuccess) {
-//       throw Exception(result.error?.message ?? "Unhandled error");
-//     }
+      case (FailureResult(:final failure), _):
+        return ProductState(error: failure.message);
 
-//     return result.data ?? [];
-//   }
+      case (_, FailureResult(:final failure)):
+        return ProductState(error: failure.message);
+    }
+  }
 
-//   /// 🔄 REFRESH
-//   Future<void> loadProducts() async {
-//     state = await AsyncValue.guard(() async {
-//       return _fetchProducts();
-//     });
-//   }
+  Future<void> nextPage() async {
+    final current = state.requireValue;
 
-//   /// ➕ ADD PRODUCT
-//   Future<String?> addProduct(Product product) async {
-//     final result = await repository.addProduct(product);
-//     if (!result.isSuccess) {
-//       return result.error?.message;
-//     }
-//     await loadProducts();
-//     return null;
-//   }
+    if (current.currentPage >= current.totalPages) return;
 
-//   /// ✏️ UPDATE PRODUCT
-//   Future<bool> updateProduct(Product product) async {
-//     final result = await repository.updateProduct(product);
-//     if (!result.isSuccess) {
-//       return false;
-//     }
-//     await loadProducts();
-//     return true;
-//   }
+    state = const AsyncLoading();
 
-//   /// 🗑️ DELETE PRODUCT
-//   Future<bool> deleteProduct(String id) async {
-//     final result = await repository.deleteProduct(id);
-//     if (!result.isSuccess) {
-//       return false;
-//     }
-//     await loadProducts();
-//     return true;
-//   }
+    state = AsyncData(await _loadProduct(page: current.currentPage + 1));
+  }
 
-//   /// 🔍 FIND BY BARCODE
-//   Future<Product?> findProductByBarcode(String barcode) async {
-//     final currentData = state.value;
+  Future<void> previousPage() async {
+    final current = state.requireValue;
 
-//     // ⚡ 1. MEMORY SEARCH
-//     if (currentData != null) {
-//       try {
-//         return currentData.firstWhere((p) => p.barcode == barcode);
-//       } catch (_) {}
-//     }
+    if (current.currentPage <= 1) return;
 
-//     final result = await repository.findByBarcode(barcode);
-//     if (!result.isSuccess) {
-//       throw Exception(result.error?.message ?? "Unhandled error");
-//     }
-//     // 🗄️ 2. DATABASE SEARCH
-//     return result.data;
-//   }
+    state = const AsyncLoading();
 
-//   Future<void> searchProducts(String query) async {
-//     state = const AsyncLoading();
+    state = AsyncData(await _loadProduct(page: current.currentPage - 1));
+  }
 
-//     state = await AsyncValue.guard(() async {
-//       final result = await repository.searchProducts(query);
+  Future<void> searchProducts(String query) async {
+    query = query.trim();
 
-//       if (!result.isSuccess) {
-//         throw Exception(result.error?.message);
-//       }
+    if (query.isEmpty) {
+      state = const AsyncLoading();
+      state = AsyncData(await _loadProduct(page: 1));
+      return;
+    }
+    state = const AsyncValue.loading();
+    final result = await ref.read(searchProductsUseCaseProvider)(query);
+    switch (result) {
+      case Success<List<ProductEntity>>(:final data):
+        state = AsyncValue.data(
+          ProductState(
+            products: data,
+            searchQuery: query,
+            totalProducts: data.length,
+            currentPage: 1,
+            pageSize: state.value?.pageSize ?? 3,
+          ),
+        );
+      case FailureResult(:final failure):
+        state = AsyncValue.data(
+          ProductState(error: failure.message, searchQuery: query),
+        );
+    }
+  }
+}
 
-//       return result.data ?? [];
-//     });
-//   }
-// }
+final productNotifierProvider =
+    AsyncNotifierProvider.autoDispose<ProductNotifier, ProductState>(
+      ProductNotifier.new,
+    );

@@ -18,9 +18,12 @@ class ProductRepositoryImpl implements ProductRepository {
   //==========================================================
 
   @override
-  Future<Result<List<ProductEntity>>> getProducts() async {
+  Future<Result<List<ProductEntity>>> getProducts({
+    required int limit,
+    required int page,
+  }) async {
     try {
-      final rows = await _localDataSource.getProducts();
+      final rows = await _localDataSource.getProducts(limit: limit, page: page);
 
       final products = rows.map((e) => e.toModel().toEntity()).toList();
 
@@ -96,6 +99,23 @@ class ProductRepositoryImpl implements ProductRepository {
   //==========================================================
 
   @override
+  Future<Result<List<ProductVariantEntity>>> getVarientList({
+    required int page,
+    required int limit,
+  }) async {
+    try {
+      final result = await _localDataSource.getVariantsList(
+        limit: limit,
+        page: page,
+      );
+      final data = result.map((item) => item.toModel().toEntity()).toList();
+      return Success(data);
+    } catch (e) {
+      return FailureResult(DatabaseFailure("Can't load variants:: $e"));
+    }
+  }
+
+  @override
   Future<Result<List<ProductVariantEntity>>> getVariants(
     String productId,
   ) async {
@@ -159,7 +179,7 @@ class ProductRepositoryImpl implements ProductRepository {
   }
 
   @override
-  Future<Result<ProductVariantEntity?>> findByBarcode(String barcode) async {
+  Future<Result<ProductVariantEntity>> findByBarcode(String barcode) async {
     try {
       final row = await _localDataSource.findByBarcode(barcode);
 
@@ -207,10 +227,78 @@ class ProductRepositoryImpl implements ProductRepository {
         productCompanion,
         variantCompanions,
       );
+      print("Added");
 
       return const Success(null);
     } catch (e) {
+      print(e.toString());
       return FailureResult(DatabaseFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<int>> getProductCounts() async {
+    try {
+      final data = await _localDataSource.getProductCount();
+      return Success(data);
+    } catch (e) {
+      print(e.toString());
+      return FailureResult(DatabaseFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> updateProductWithVariant(
+    ProductEntity product,
+    List<ProductVariantEntity> variants,
+  ) async {
+    // TODO: implement updateProductWithVariant
+    try {
+      final productModel = ProductModel.fromEntity(product);
+      final variantModels = variants
+          .map((v) => ProductVariantModel.fromEntity(v).toDrift())
+          .toList();
+
+      await _localDataSource.updateProductWithVariants(
+        productModel.toDrift(),
+        variantModels,
+      );
+
+      print("Added");
+
+      return const Success(null);
+    } catch (e) {
+      print(e.toString());
+      return FailureResult(DatabaseFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<int>> getProductVariantCount() async {
+    try {
+      final counts = await _localDataSource.getVariantsCount();
+
+      return Success(counts);
+    } catch (e) {
+      return FailureResult(DatabaseFailure("Can't get variant count:: $e"));
+    }
+  }
+
+  @override
+  Future<Result<List<ProductVariantEntity>>> searchProductVariants(
+    String query,
+  ) async {
+    try {
+      final result = await _localDataSource.searchProductVariants(query);
+      final parsedData = result
+          .map((product) => product.toModel().toEntity())
+          .toList();
+
+      return Success(parsedData);
+    } catch (e) {
+      return FailureResult(
+        DatabaseFailure("Can't search product variant due to :: $e"),
+      );
     }
   }
 }

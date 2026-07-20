@@ -11,12 +11,16 @@ class $CategoriesTable extends Categories
   $CategoriesTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
     'id',
     aliasedName,
     false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
   );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
@@ -38,18 +42,6 @@ class $CategoriesTable extends Categories
     true,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-  );
-  static const VerificationMeta _productCountMeta = const VerificationMeta(
-    'productCount',
-  );
-  @override
-  late final GeneratedColumn<int> productCount = GeneratedColumn<int>(
-    'product_count',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0),
   );
   static const VerificationMeta _isActiveMeta = const VerificationMeta(
     'isActive',
@@ -93,7 +85,6 @@ class $CategoriesTable extends Categories
     id,
     name,
     description,
-    productCount,
     isActive,
     createdAt,
     updatedAt,
@@ -112,8 +103,6 @@ class $CategoriesTable extends Categories
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    } else if (isInserting) {
-      context.missing(_idMeta);
     }
     if (data.containsKey('name')) {
       context.handle(
@@ -129,15 +118,6 @@ class $CategoriesTable extends Categories
         description.isAcceptableOrUnknown(
           data['description']!,
           _descriptionMeta,
-        ),
-      );
-    }
-    if (data.containsKey('product_count')) {
-      context.handle(
-        _productCountMeta,
-        productCount.isAcceptableOrUnknown(
-          data['product_count']!,
-          _productCountMeta,
         ),
       );
     }
@@ -173,7 +153,7 @@ class $CategoriesTable extends Categories
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Category(
       id: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
+        DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
       name: attachedDatabase.typeMapping.read(
@@ -184,10 +164,6 @@ class $CategoriesTable extends Categories
         DriftSqlType.string,
         data['${effectivePrefix}description'],
       ),
-      productCount: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}product_count'],
-      )!,
       isActive: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_active'],
@@ -210,10 +186,9 @@ class $CategoriesTable extends Categories
 }
 
 class Category extends DataClass implements Insertable<Category> {
-  final String id;
+  final int id;
   final String name;
   final String? description;
-  final int productCount;
   final bool isActive;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -221,7 +196,6 @@ class Category extends DataClass implements Insertable<Category> {
     required this.id,
     required this.name,
     this.description,
-    required this.productCount,
     required this.isActive,
     required this.createdAt,
     required this.updatedAt,
@@ -229,12 +203,11 @@ class Category extends DataClass implements Insertable<Category> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
+    map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
     if (!nullToAbsent || description != null) {
       map['description'] = Variable<String>(description);
     }
-    map['product_count'] = Variable<int>(productCount);
     map['is_active'] = Variable<bool>(isActive);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -248,7 +221,6 @@ class Category extends DataClass implements Insertable<Category> {
       description: description == null && nullToAbsent
           ? const Value.absent()
           : Value(description),
-      productCount: Value(productCount),
       isActive: Value(isActive),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
@@ -261,10 +233,9 @@ class Category extends DataClass implements Insertable<Category> {
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Category(
-      id: serializer.fromJson<String>(json['id']),
+      id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       description: serializer.fromJson<String?>(json['description']),
-      productCount: serializer.fromJson<int>(json['productCount']),
       isActive: serializer.fromJson<bool>(json['isActive']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -274,10 +245,9 @@ class Category extends DataClass implements Insertable<Category> {
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
+      'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
       'description': serializer.toJson<String?>(description),
-      'productCount': serializer.toJson<int>(productCount),
       'isActive': serializer.toJson<bool>(isActive),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -285,10 +255,9 @@ class Category extends DataClass implements Insertable<Category> {
   }
 
   Category copyWith({
-    String? id,
+    int? id,
     String? name,
     Value<String?> description = const Value.absent(),
-    int? productCount,
     bool? isActive,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -296,7 +265,6 @@ class Category extends DataClass implements Insertable<Category> {
     id: id ?? this.id,
     name: name ?? this.name,
     description: description.present ? description.value : this.description,
-    productCount: productCount ?? this.productCount,
     isActive: isActive ?? this.isActive,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -308,9 +276,6 @@ class Category extends DataClass implements Insertable<Category> {
       description: data.description.present
           ? data.description.value
           : this.description,
-      productCount: data.productCount.present
-          ? data.productCount.value
-          : this.productCount,
       isActive: data.isActive.present ? data.isActive.value : this.isActive,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -323,7 +288,6 @@ class Category extends DataClass implements Insertable<Category> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
-          ..write('productCount: $productCount, ')
           ..write('isActive: $isActive, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
@@ -332,15 +296,8 @@ class Category extends DataClass implements Insertable<Category> {
   }
 
   @override
-  int get hashCode => Object.hash(
-    id,
-    name,
-    description,
-    productCount,
-    isActive,
-    createdAt,
-    updatedAt,
-  );
+  int get hashCode =>
+      Object.hash(id, name, description, isActive, createdAt, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -348,85 +305,69 @@ class Category extends DataClass implements Insertable<Category> {
           other.id == this.id &&
           other.name == this.name &&
           other.description == this.description &&
-          other.productCount == this.productCount &&
           other.isActive == this.isActive &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
 
 class CategoriesCompanion extends UpdateCompanion<Category> {
-  final Value<String> id;
+  final Value<int> id;
   final Value<String> name;
   final Value<String?> description;
-  final Value<int> productCount;
   final Value<bool> isActive;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
-  final Value<int> rowid;
   const CategoriesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.description = const Value.absent(),
-    this.productCount = const Value.absent(),
     this.isActive = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
-    this.rowid = const Value.absent(),
   });
   CategoriesCompanion.insert({
-    required String id,
+    this.id = const Value.absent(),
     required String name,
     this.description = const Value.absent(),
-    this.productCount = const Value.absent(),
     this.isActive = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
-    this.rowid = const Value.absent(),
-  }) : id = Value(id),
-       name = Value(name),
+  }) : name = Value(name),
        createdAt = Value(createdAt),
        updatedAt = Value(updatedAt);
   static Insertable<Category> custom({
-    Expression<String>? id,
+    Expression<int>? id,
     Expression<String>? name,
     Expression<String>? description,
-    Expression<int>? productCount,
     Expression<bool>? isActive,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
-    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (description != null) 'description': description,
-      if (productCount != null) 'product_count': productCount,
       if (isActive != null) 'is_active': isActive,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
-      if (rowid != null) 'rowid': rowid,
     });
   }
 
   CategoriesCompanion copyWith({
-    Value<String>? id,
+    Value<int>? id,
     Value<String>? name,
     Value<String?>? description,
-    Value<int>? productCount,
     Value<bool>? isActive,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
-    Value<int>? rowid,
   }) {
     return CategoriesCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
-      productCount: productCount ?? this.productCount,
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -434,16 +375,13 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<String>(id.value);
+      map['id'] = Variable<int>(id.value);
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
     if (description.present) {
       map['description'] = Variable<String>(description.value);
-    }
-    if (productCount.present) {
-      map['product_count'] = Variable<int>(productCount.value);
     }
     if (isActive.present) {
       map['is_active'] = Variable<bool>(isActive.value);
@@ -454,9 +392,6 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
     return map;
   }
 
@@ -466,11 +401,9 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
-          ..write('productCount: $productCount, ')
           ..write('isActive: $isActive, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt, ')
-          ..write('rowid: $rowid')
+          ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
   }
@@ -494,11 +427,11 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
     'categoryId',
   );
   @override
-  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
+  late final GeneratedColumn<int> categoryId = GeneratedColumn<int>(
     'category_id',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'REFERENCES categories (id)',
@@ -663,7 +596,7 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
         data['${effectivePrefix}id'],
       )!,
       categoryId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
+        DriftSqlType.int,
         data['${effectivePrefix}category_id'],
       )!,
       name: attachedDatabase.typeMapping.read(
@@ -701,7 +634,7 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
 
 class Product extends DataClass implements Insertable<Product> {
   final String id;
-  final String categoryId;
+  final int categoryId;
   final String name;
   final String? description;
   final String? image;
@@ -722,7 +655,7 @@ class Product extends DataClass implements Insertable<Product> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['category_id'] = Variable<String>(categoryId);
+    map['category_id'] = Variable<int>(categoryId);
     map['name'] = Variable<String>(name);
     if (!nullToAbsent || description != null) {
       map['description'] = Variable<String>(description);
@@ -760,7 +693,7 @@ class Product extends DataClass implements Insertable<Product> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Product(
       id: serializer.fromJson<String>(json['id']),
-      categoryId: serializer.fromJson<String>(json['categoryId']),
+      categoryId: serializer.fromJson<int>(json['categoryId']),
       name: serializer.fromJson<String>(json['name']),
       description: serializer.fromJson<String?>(json['description']),
       image: serializer.fromJson<String?>(json['image']),
@@ -774,7 +707,7 @@ class Product extends DataClass implements Insertable<Product> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'categoryId': serializer.toJson<String>(categoryId),
+      'categoryId': serializer.toJson<int>(categoryId),
       'name': serializer.toJson<String>(name),
       'description': serializer.toJson<String?>(description),
       'image': serializer.toJson<String?>(image),
@@ -786,7 +719,7 @@ class Product extends DataClass implements Insertable<Product> {
 
   Product copyWith({
     String? id,
-    String? categoryId,
+    int? categoryId,
     String? name,
     Value<String?> description = const Value.absent(),
     Value<String?> image = const Value.absent(),
@@ -862,7 +795,7 @@ class Product extends DataClass implements Insertable<Product> {
 
 class ProductsCompanion extends UpdateCompanion<Product> {
   final Value<String> id;
-  final Value<String> categoryId;
+  final Value<int> categoryId;
   final Value<String> name;
   final Value<String?> description;
   final Value<String?> image;
@@ -883,7 +816,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
   });
   ProductsCompanion.insert({
     required String id,
-    required String categoryId,
+    required int categoryId,
     required String name,
     this.description = const Value.absent(),
     this.image = const Value.absent(),
@@ -896,7 +829,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
        name = Value(name);
   static Insertable<Product> custom({
     Expression<String>? id,
-    Expression<String>? categoryId,
+    Expression<int>? categoryId,
     Expression<String>? name,
     Expression<String>? description,
     Expression<String>? image,
@@ -920,7 +853,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
 
   ProductsCompanion copyWith({
     Value<String>? id,
-    Value<String>? categoryId,
+    Value<int>? categoryId,
     Value<String>? name,
     Value<String?>? description,
     Value<String?>? image,
@@ -949,7 +882,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
       map['id'] = Variable<String>(id.value);
     }
     if (categoryId.present) {
-      map['category_id'] = Variable<String>(categoryId.value);
+      map['category_id'] = Variable<int>(categoryId.value);
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
@@ -1904,25 +1837,21 @@ abstract class _$AppDatabase extends GeneratedDatabase {
 
 typedef $$CategoriesTableCreateCompanionBuilder =
     CategoriesCompanion Function({
-      required String id,
+      Value<int> id,
       required String name,
       Value<String?> description,
-      Value<int> productCount,
       Value<bool> isActive,
       required DateTime createdAt,
       required DateTime updatedAt,
-      Value<int> rowid,
     });
 typedef $$CategoriesTableUpdateCompanionBuilder =
     CategoriesCompanion Function({
-      Value<String> id,
+      Value<int> id,
       Value<String> name,
       Value<String?> description,
-      Value<int> productCount,
       Value<bool> isActive,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
-      Value<int> rowid,
     });
 
 final class $$CategoriesTableReferences
@@ -1940,7 +1869,7 @@ final class $$CategoriesTableReferences
     final manager = $$ProductsTableTableManager(
       $_db,
       $_db.products,
-    ).filter((f) => f.categoryId.id.sqlEquals($_itemColumn<String>('id')!));
+    ).filter((f) => f.categoryId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_productsRefsTable($_db));
     return ProcessedTableManager(
@@ -1958,7 +1887,7 @@ class $$CategoriesTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<String> get id => $composableBuilder(
+  ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => ColumnFilters(column),
   );
@@ -1970,11 +1899,6 @@ class $$CategoriesTableFilterComposer
 
   ColumnFilters<String> get description => $composableBuilder(
     column: $table.description,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get productCount => $composableBuilder(
-    column: $table.productCount,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2028,7 +1952,7 @@ class $$CategoriesTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<String> get id => $composableBuilder(
+  ColumnOrderings<int> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => ColumnOrderings(column),
   );
@@ -2040,11 +1964,6 @@ class $$CategoriesTableOrderingComposer
 
   ColumnOrderings<String> get description => $composableBuilder(
     column: $table.description,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get productCount => $composableBuilder(
-    column: $table.productCount,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -2073,7 +1992,7 @@ class $$CategoriesTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get id =>
+  GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
   GeneratedColumn<String> get name =>
@@ -2081,11 +2000,6 @@ class $$CategoriesTableAnnotationComposer
 
   GeneratedColumn<String> get description => $composableBuilder(
     column: $table.description,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<int> get productCount => $composableBuilder(
-    column: $table.productCount,
     builder: (column) => column,
   );
 
@@ -2152,43 +2066,35 @@ class $$CategoriesTableTableManager
               $$CategoriesTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
-                Value<String> id = const Value.absent(),
+                Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String?> description = const Value.absent(),
-                Value<int> productCount = const Value.absent(),
                 Value<bool> isActive = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
               }) => CategoriesCompanion(
                 id: id,
                 name: name,
                 description: description,
-                productCount: productCount,
                 isActive: isActive,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
-                rowid: rowid,
               ),
           createCompanionCallback:
               ({
-                required String id,
+                Value<int> id = const Value.absent(),
                 required String name,
                 Value<String?> description = const Value.absent(),
-                Value<int> productCount = const Value.absent(),
                 Value<bool> isActive = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
-                Value<int> rowid = const Value.absent(),
               }) => CategoriesCompanion.insert(
                 id: id,
                 name: name,
                 description: description,
-                productCount: productCount,
                 isActive: isActive,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
-                rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -2249,7 +2155,7 @@ typedef $$CategoriesTableProcessedTableManager =
 typedef $$ProductsTableCreateCompanionBuilder =
     ProductsCompanion Function({
       required String id,
-      required String categoryId,
+      required int categoryId,
       required String name,
       Value<String?> description,
       Value<String?> image,
@@ -2261,7 +2167,7 @@ typedef $$ProductsTableCreateCompanionBuilder =
 typedef $$ProductsTableUpdateCompanionBuilder =
     ProductsCompanion Function({
       Value<String> id,
-      Value<String> categoryId,
+      Value<int> categoryId,
       Value<String> name,
       Value<String?> description,
       Value<String?> image,
@@ -2281,7 +2187,7 @@ final class $$ProductsTableReferences
       );
 
   $$CategoriesTableProcessedTableManager get categoryId {
-    final $_column = $_itemColumn<String>('category_id')!;
+    final $_column = $_itemColumn<int>('category_id')!;
 
     final manager = $$CategoriesTableTableManager(
       $_db,
@@ -2589,7 +2495,7 @@ class $$ProductsTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
-                Value<String> categoryId = const Value.absent(),
+                Value<int> categoryId = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String?> description = const Value.absent(),
                 Value<String?> image = const Value.absent(),
@@ -2611,7 +2517,7 @@ class $$ProductsTableTableManager
           createCompanionCallback:
               ({
                 required String id,
-                required String categoryId,
+                required int categoryId,
                 required String name,
                 Value<String?> description = const Value.absent(),
                 Value<String?> image = const Value.absent(),

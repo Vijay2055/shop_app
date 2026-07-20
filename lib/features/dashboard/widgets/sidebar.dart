@@ -32,7 +32,7 @@ class Sidebar extends StatelessWidget {
           _buildItem(
             context,
             title: "Product",
-            route: Pages.category,
+            route: Pages.product,
             currentLocation: currentLocation,
           ),
 

@@ -8,8 +8,9 @@ import 'package:shop_app/core/database/providers/app_database_provider.dart';
 abstract class CategoryLocalDataSource {
   Future<List<Category>> getAllCategories();
   Future<void> insertCategory(CategoriesCompanion companion);
-  Future<void> deleteCategory(String id);
-  Future<void> updateCategory(String id,CategoriesCompanion companion);
+  Future<void> deleteCategory(int id);
+  Future<void> updateCategory(int id, CategoriesCompanion companion);
+  Future<Category> getCategoryById(int id);
 }
 
 class CategoryLocalDataSourceImpl implements CategoryLocalDataSource {
@@ -32,17 +33,25 @@ class CategoryLocalDataSourceImpl implements CategoryLocalDataSource {
   }
 
   @override
-  Future<void> deleteCategory(String id) async {
+  Future<void> deleteCategory(int id) async {
     await (_db.delete(_db.categories)..where((tbl) => tbl.id.equals(id))).go();
   }
 
   // lib/features/category/data/datasources/category_local_data_source.dart
 
-@override
-Future<void> updateCategory(String id, CategoriesCompanion companion) async {
-  await (_db.update(_db.categories)..where((tbl) => tbl.id.equals(id)))
-      .write(companion);
-}
+  @override
+  Future<void> updateCategory(int id, CategoriesCompanion companion) async {
+    await (_db.update(
+      _db.categories,
+    )..where((tbl) => tbl.id.equals(id))).write(companion);
+  }
+
+  @override
+  Future<Category> getCategoryById(int id) async{
+    return await (
+      _db.select(_db.categories)..where((tbl) => tbl.id.equals(id))
+    ).getSingle();
+  }
 
   // Inside your CategoryLocalDataSource
   // Future<List<CategoryWithCount>> getCategoriesWithCounts() {
@@ -64,8 +73,9 @@ Future<void> updateCategory(String id, CategoriesCompanion companion) async {
   // }
 }
 
-
-final categoryLocalDataSourceProvider = Provider<CategoryLocalDataSource>((ref) {
+final categoryLocalDataSourceProvider = Provider<CategoryLocalDataSource>((
+  ref,
+) {
   final db = ref.watch(appDatabaseProvider);
   return CategoryLocalDataSourceImpl(db);
 });

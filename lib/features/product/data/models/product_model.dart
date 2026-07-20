@@ -13,7 +13,7 @@ abstract class ProductModel with _$ProductModel {
     required String id,
 
     @JsonKey(name: 'category_id')
-    required String categoryId,
+    required int categoryId,
 
     required String name,
 

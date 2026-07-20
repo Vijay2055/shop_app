@@ -5,7 +5,15 @@ import 'package:shop_app/features/product/domain/repositories/product_repository
 class GetProductUsecase {
   final ProductRepository repository;
   const GetProductUsecase({required this.repository});
-  Future<Result<List<ProductEntity>>> call() async {
-    return await repository.getProducts();
+  Future<Result<List<ProductEntity>>> call(
+    {
+       int limit=20,
+       int page=1,
+    }
+  ) async {
+    return await repository.getProducts(
+      limit: limit,
+      page: page
+    );
   }
 }

@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$BarcodeState {
 
- List<BarcodeItem> get items; String get searchQuery; BarcodeLayout get layout;
+ List<BarcodeItem> get items; String get searchQuery; bool get isLoading; String? get error; String? get message; BarcodeLayout get layout;
 /// Create a copy of BarcodeState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $BarcodeStateCopyWith<BarcodeState> get copyWith => _$BarcodeStateCopyWithImpl<B
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is BarcodeState&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.searchQuery, searchQuery) || other.searchQuery == searchQuery)&&(identical(other.layout, layout) || other.layout == layout));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BarcodeState&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.searchQuery, searchQuery) || other.searchQuery == searchQuery)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.error, error) || other.error == error)&&(identical(other.message, message) || other.message == message)&&(identical(other.layout, layout) || other.layout == layout));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(items),searchQuery,layout);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(items),searchQuery,isLoading,error,message,layout);
 
 @override
 String toString() {
-  return 'BarcodeState(items: $items, searchQuery: $searchQuery, layout: $layout)';
+  return 'BarcodeState(items: $items, searchQuery: $searchQuery, isLoading: $isLoading, error: $error, message: $message, layout: $layout)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $BarcodeStateCopyWith<$Res>  {
   factory $BarcodeStateCopyWith(BarcodeState value, $Res Function(BarcodeState) _then) = _$BarcodeStateCopyWithImpl;
 @useResult
 $Res call({
- List<BarcodeItem> items, String searchQuery, BarcodeLayout layout
+ List<BarcodeItem> items, String searchQuery, bool isLoading, String? error, String? message, BarcodeLayout layout
 });
 
 
@@ -62,11 +62,14 @@ class _$BarcodeStateCopyWithImpl<$Res>
 
 /// Create a copy of BarcodeState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? items = null,Object? searchQuery = null,Object? layout = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? items = null,Object? searchQuery = null,Object? isLoading = null,Object? error = freezed,Object? message = freezed,Object? layout = null,}) {
   return _then(_self.copyWith(
 items: null == items ? _self.items : items // ignore: cast_nullable_to_non_nullable
 as List<BarcodeItem>,searchQuery: null == searchQuery ? _self.searchQuery : searchQuery // ignore: cast_nullable_to_non_nullable
-as String,layout: null == layout ? _self.layout : layout // ignore: cast_nullable_to_non_nullable
+as String,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
+as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
+as String?,message: freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String?,layout: null == layout ? _self.layout : layout // ignore: cast_nullable_to_non_nullable
 as BarcodeLayout,
   ));
 }
@@ -152,10 +155,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<BarcodeItem> items,  String searchQuery,  BarcodeLayout layout)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<BarcodeItem> items,  String searchQuery,  bool isLoading,  String? error,  String? message,  BarcodeLayout layout)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _BarcodeState() when $default != null:
-return $default(_that.items,_that.searchQuery,_that.layout);case _:
+return $default(_that.items,_that.searchQuery,_that.isLoading,_that.error,_that.message,_that.layout);case _:
   return orElse();
 
 }
@@ -173,10 +176,10 @@ return $default(_that.items,_that.searchQuery,_that.layout);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<BarcodeItem> items,  String searchQuery,  BarcodeLayout layout)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<BarcodeItem> items,  String searchQuery,  bool isLoading,  String? error,  String? message,  BarcodeLayout layout)  $default,) {final _that = this;
 switch (_that) {
 case _BarcodeState():
-return $default(_that.items,_that.searchQuery,_that.layout);case _:
+return $default(_that.items,_that.searchQuery,_that.isLoading,_that.error,_that.message,_that.layout);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -193,10 +196,10 @@ return $default(_that.items,_that.searchQuery,_that.layout);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<BarcodeItem> items,  String searchQuery,  BarcodeLayout layout)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<BarcodeItem> items,  String searchQuery,  bool isLoading,  String? error,  String? message,  BarcodeLayout layout)?  $default,) {final _that = this;
 switch (_that) {
 case _BarcodeState() when $default != null:
-return $default(_that.items,_that.searchQuery,_that.layout);case _:
+return $default(_that.items,_that.searchQuery,_that.isLoading,_that.error,_that.message,_that.layout);case _:
   return null;
 
 }
@@ -208,7 +211,7 @@ return $default(_that.items,_that.searchQuery,_that.layout);case _:
 
 
 class _BarcodeState implements BarcodeState {
-  const _BarcodeState({final  List<BarcodeItem> items = const [], this.searchQuery = '', this.layout = BarcodeLayout.single}): _items = items;
+  const _BarcodeState({final  List<BarcodeItem> items = const [], this.searchQuery = '', this.isLoading = false, this.error = null, this.message = null, this.layout = BarcodeLayout.single}): _items = items;
   
 
  final  List<BarcodeItem> _items;
@@ -219,6 +222,9 @@ class _BarcodeState implements BarcodeState {
 }
 
 @override@JsonKey() final  String searchQuery;
+@override@JsonKey() final  bool isLoading;
+@override@JsonKey() final  String? error;
+@override@JsonKey() final  String? message;
 @override@JsonKey() final  BarcodeLayout layout;
 
 /// Create a copy of BarcodeState
@@ -231,16 +237,16 @@ _$BarcodeStateCopyWith<_BarcodeState> get copyWith => __$BarcodeStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _BarcodeState&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.searchQuery, searchQuery) || other.searchQuery == searchQuery)&&(identical(other.layout, layout) || other.layout == layout));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _BarcodeState&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.searchQuery, searchQuery) || other.searchQuery == searchQuery)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.error, error) || other.error == error)&&(identical(other.message, message) || other.message == message)&&(identical(other.layout, layout) || other.layout == layout));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_items),searchQuery,layout);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_items),searchQuery,isLoading,error,message,layout);
 
 @override
 String toString() {
-  return 'BarcodeState(items: $items, searchQuery: $searchQuery, layout: $layout)';
+  return 'BarcodeState(items: $items, searchQuery: $searchQuery, isLoading: $isLoading, error: $error, message: $message, layout: $layout)';
 }
 
 
@@ -251,7 +257,7 @@ abstract mixin class _$BarcodeStateCopyWith<$Res> implements $BarcodeStateCopyWi
   factory _$BarcodeStateCopyWith(_BarcodeState value, $Res Function(_BarcodeState) _then) = __$BarcodeStateCopyWithImpl;
 @override @useResult
 $Res call({
- List<BarcodeItem> items, String searchQuery, BarcodeLayout layout
+ List<BarcodeItem> items, String searchQuery, bool isLoading, String? error, String? message, BarcodeLayout layout
 });
 
 
@@ -268,11 +274,14 @@ class __$BarcodeStateCopyWithImpl<$Res>
 
 /// Create a copy of BarcodeState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? items = null,Object? searchQuery = null,Object? layout = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? items = null,Object? searchQuery = null,Object? isLoading = null,Object? error = freezed,Object? message = freezed,Object? layout = null,}) {
   return _then(_BarcodeState(
 items: null == items ? _self._items : items // ignore: cast_nullable_to_non_nullable
 as List<BarcodeItem>,searchQuery: null == searchQuery ? _self.searchQuery : searchQuery // ignore: cast_nullable_to_non_nullable
-as String,layout: null == layout ? _self.layout : layout // ignore: cast_nullable_to_non_nullable
+as String,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
+as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
+as String?,message: freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String?,layout: null == layout ? _self.layout : layout // ignore: cast_nullable_to_non_nullable
 as BarcodeLayout,
   ));
 }

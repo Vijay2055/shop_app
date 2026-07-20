@@ -1,16 +1,18 @@
+import 'dart:ffi';
+
 import 'package:drift/drift.dart';
 
 class Categories extends Table {
-  TextColumn get id => text()();
+  IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().unique()();
   
   // Nullable column for description
   TextColumn get description => text().nullable()();
 
-  // Custom column name matching the DB snake_case with a default value
-  IntColumn get productCount => integer()
-      .named('product_count')
-      .withDefault(const Constant(0))();
+  // // Custom column name matching the DB snake_case with a default value
+  // IntColumn get productCount => integer()
+  //     .named('product_count')
+  //     .withDefault(const Constant(0))();
 
   // Boolean column mapping to a custom name with a default value
   BoolColumn get isActive => boolean()

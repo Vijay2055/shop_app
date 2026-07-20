@@ -9,7 +9,7 @@ part of 'product_model.dart';
 _ProductModel _$ProductModelFromJson(Map<String, dynamic> json) =>
     _ProductModel(
       id: json['id'] as String,
-      categoryId: json['category_id'] as String,
+      categoryId: (json['category_id'] as num).toInt(),
       name: json['name'] as String,
       description: json['description'] as String?,
       image: json['image'] as String?,

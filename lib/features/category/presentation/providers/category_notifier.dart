@@ -32,7 +32,7 @@ class CategoryNotifier extends AsyncNotifier<CategoryState> {
     }
   }
 
-  Future<void> addCategory(CategoryEntity category) async {
+  Future<Result> addCategory(CategoryEntity category) async {
     final addCategory = ref.read(addCategoryUsecaseProvider);
 
     final result = await addCategory(category);
@@ -48,9 +48,7 @@ class CategoryNotifier extends AsyncNotifier<CategoryState> {
       case FailureResult(failure: final failure):
         ref.read(resultProvider.notifier).showError(failure.message);
     }
+
+    return result;
   }
 }
-
-final categoryProvider = AsyncNotifierProvider<CategoryNotifier, CategoryState>(
-  CategoryNotifier.new,
-);

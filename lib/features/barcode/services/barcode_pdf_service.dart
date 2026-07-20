@@ -11,8 +11,6 @@ import 'package:shop_app/features/barcode/config/layout_confing.dart';
 import 'package:shop_app/features/barcode/domain/entity/barcode_item.dart';
 
 class BarcodePdfService {
-  
-
   Future<Uint8List> generatePdf({
     required List<BarcodeItem> items,
     required BarcodeLayout layout,
@@ -43,26 +41,33 @@ class BarcodePdfService {
       pdf.addPage(
         pw.Page(
           pageFormat: PdfPageFormat.a4,
-          margin: const pw.EdgeInsets.all(10),
+          margin: pw.EdgeInsets.zero,
           build: (context) {
-            final pageWidth = PdfPageFormat.a4.availableWidth - 20;
+            return pw.Stack(
+              children: List.generate(pageLabels.length, (index) {
+                final row = index ~/ config.columns;
+                final col = index % config.columns;
 
-            final pageHeight = PdfPageFormat.a4.availableHeight - 20;
+                final left =
+                    (config.leftMarginMm +
+                        col * (config.widthMm + config.horizontalGapMm)) *
+                    PdfPageFormat.mm;
 
-            final labelWidth = pageWidth / config.columns;
+                final top =
+                    (config.topMarginMm +
+                        row * (config.heightMm + config.verticalGapMm)) *
+                    PdfPageFormat.mm;
 
-            final labelHeight = pageHeight / config.rows;
-
-            return pw.Wrap(
-              spacing: 0,
-              runSpacing: 0,
-              children: pageLabels.map((item) {
-                return pw.Container(
-                  width: labelWidth,
-                  height: labelHeight,
-                  child: _buildLabel(item, font, config),
+                return pw.Positioned(
+                  left: left,
+                  top: top,
+                  child: pw.Container(
+                    width: config.widthMm * PdfPageFormat.mm,
+                    height: config.heightMm * PdfPageFormat.mm,
+                    child: _buildLabel(pageLabels[index], font, config),
+                  ),
                 );
-              }).toList(),
+              }),
             );
           },
         ),
@@ -72,8 +77,8 @@ class BarcodePdfService {
     return pdf.save();
   }
 
-  Future<void> printPdf(Uint8List bytes) async {
-    await Printing.layoutPdf(onLayout: (_) async => bytes);
+  Future<bool> printPdf(Uint8List bytes) async {
+    return await Printing.layoutPdf(onLayout: (_) async => bytes);
   }
 
   Future<File> savePdf(Uint8List bytes, String fileName) async {
@@ -85,59 +90,51 @@ class BarcodePdfService {
 
     return file;
   }
-
-  
 }
-
-
 
 pw.Widget _buildLabel(
   BarcodeItem item,
   pw.Font font,
   BarcodeLayoutConfig config,
 ) {
-  final labelHeight = config.heightMm * PdfPageFormat.mm;
-
-  final labelWidth = config.widthMm * PdfPageFormat.mm;
-
   return pw.Container(
+    alignment: pw.Alignment.center,
     padding: const pw.EdgeInsets.all(2),
-
-    decoration: pw.BoxDecoration(border: pw.Border.all(width: 0.3)),
-
     child: pw.Column(
       mainAxisAlignment: pw.MainAxisAlignment.center,
-
       children: [
         pw.Text(
-          item.product.name,
-          maxLines: 1,
+          item.product.sku,
           textAlign: pw.TextAlign.center,
+          maxLines: 1,
           style: pw.TextStyle(
             font: font,
+            fontSize: 8,
             fontWeight: pw.FontWeight.bold,
-            fontSize: labelHeight * 0.09,
           ),
         ),
 
-        pw.SizedBox(height: labelHeight * 0.03),
+        pw.SizedBox(height: 2),
 
         pw.BarcodeWidget(
           barcode: pw.Barcode.code128(),
           data: item.product.barcode,
-          width: labelWidth * 0.85,
-          height: labelHeight * 0.45,
+          width: config.widthMm * PdfPageFormat.mm * .80,
+          height: config.heightMm * PdfPageFormat.mm * .38,
         ),
 
-        pw.SizedBox(height: labelHeight * 0.02),
+        pw.SizedBox(height: 2),
 
         pw.Text(
           item.product.barcode,
-          style: pw.TextStyle(font: font, fontSize: labelHeight * 0.07),
+          textAlign: pw.TextAlign.center,
+          style: pw.TextStyle(font: font, fontSize: 7),
         ),
       ],
     ),
   );
 }
 
-final pdfServiceProvider=Provider<BarcodePdfService>((ref) => BarcodePdfService());
+final pdfServiceProvider = Provider<BarcodePdfService>(
+  (ref) => BarcodePdfService(),
+);

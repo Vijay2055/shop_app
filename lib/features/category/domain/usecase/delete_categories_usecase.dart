@@ -6,7 +6,7 @@ class DeleteCategoriesUsecase {
 
   const DeleteCategoriesUsecase(this._categoryRepository);
 
-  Future<Result<void>> call(String id) async {
+  Future<Result<void>> call(int id) async {
     return await _categoryRepository.deleteCategory(id);
   }
 }

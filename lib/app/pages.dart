@@ -2,6 +2,8 @@ class Pages {
   static const String homepage = '/';
   static const String category = '/category';
   static const String product = '/product';
+  static const String addEditProduct = '/product/addEditProduct';
+  static const String addProductVariant = '/product/addVariant';
   static const String billing = '/billing';
   static const String utility = '/utility';
   static const String history = '/history';

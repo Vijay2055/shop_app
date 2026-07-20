@@ -8,7 +8,7 @@ part of 'category_model.dart';
 
 _CategoryModel _$CategoryModelFromJson(Map<String, dynamic> json) =>
     _CategoryModel(
-      id: json['id'] as String,
+      id: (json['id'] as num?)?.toInt(),
       name: json['name'] as String,
       description: json['description'] as String?,
       isActive: json['is_active'] as bool? ?? true,

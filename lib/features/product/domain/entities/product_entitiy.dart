@@ -1,7 +1,7 @@
 class ProductEntity {
   final String id;
 
-  final String categoryId;
+  final int categoryId;
 
   final String name;
 

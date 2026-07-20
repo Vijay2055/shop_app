@@ -9,7 +9,7 @@ part 'category_model.g.dart'; // Needed for JSON serialization
 @freezed
 abstract class CategoryModel with _$CategoryModel {
   const factory CategoryModel({
-    required String id,
+    int? id,
     required String name,
     String? description,
     @JsonKey(name: 'is_active') @Default(true) bool isActive,
@@ -23,14 +23,15 @@ abstract class CategoryModel with _$CategoryModel {
 
   // 2. From Entity (Domain Entity -> Model, ready for Database)
   factory CategoryModel.fromEntity(CategoryEntity entity) {
+    final now = DateTime.now();
     return CategoryModel(
       id: entity.id,
       name: entity.name,
       description: entity.description,
 
       isActive: entity.isActive,
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt,
+      createdAt: now,
+      updatedAt: now,
     );
   }
 }
@@ -70,14 +71,13 @@ extension CategoryTableX on Category {
 // 5. Extension to convert your Domain Entity into Drift's Companion for inserts/updates
 extension CategoryEntityX on CategoryEntity {
   CategoriesCompanion toCompanion() {
+    final now = DateTime.now();
     return CategoriesCompanion.insert(
-      id: id,
       name: name,
       description: Value(description),
-
       isActive: Value(isActive),
-      createdAt: createdAt,
-      updatedAt: updatedAt,
+      createdAt: now,
+      updatedAt: now,
     );
   }
 }

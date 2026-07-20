@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shop_app/core/utils/constants.dart';
+import 'package:shop_app/core/utils/result.dart';
 import 'package:shop_app/features/barcode/domain/entity/barcode_item.dart';
 import 'package:shop_app/features/barcode/presentation/view_states/barcode_state.dart';
-import 'package:shop_app/features/product/domain/entities/product.dart';
+import 'package:shop_app/features/barcode/providers/barcode_generatepdfusecase_provider.dart';
+import 'package:shop_app/features/product/domain/entities/product_variant_entity.dart';
 
 final barcodeProvider = NotifierProvider<BarcodeNotifier, BarcodeState>(
   BarcodeNotifier.new,
@@ -14,11 +16,46 @@ class BarcodeNotifier extends Notifier<BarcodeState> {
     return const BarcodeState();
   }
 
+  Future<String> saveBarcode() async {
+    state = state.copyWith(isLoading: true);
+    final result = await ref.read(barcodeSavePdfUsecaseProvider)(
+      fileName: 'barcode_labels',
+      items: state.items,
+      layout: state.layout,
+    );
+    switch (result) {
+      case Success<String>(:final data):
+        state = state.copyWith(message: data, isLoading: false);
+        return data;
+      case FailureResult<String>(:final failure):
+        state = state.copyWith(error: failure.message, isLoading: false);
+        return failure.message;
+    }
+  }
+
+  Future<String> printBarcode() async {
+    state = state.copyWith(isLoading: true);
+    final result = await ref.read(barcodePrintusecaseProvider)(
+      items: state.items,
+      layout: state.layout,
+    );
+
+    switch (result) {
+      case Success<String>(:final data):
+        state = state.copyWith(message: data, isLoading: false);
+        return data;
+      case FailureResult<String>(:final failure):
+        state = state.copyWith(error: failure.message, isLoading: false);
+        return failure.message;
+    }
+
+  }
+
   void updateSearch(String value) {
     state = state.copyWith(searchQuery: value);
   }
 
-  void toggleProduct(Product product) {
+  void toggleProduct(ProductVariantEntity product) {
     final items = [...state.items];
 
     final index = items.indexWhere((e) => e.product.id == product.id);
@@ -36,9 +73,9 @@ class BarcodeNotifier extends Notifier<BarcodeState> {
     state = state.copyWith(items: []);
   }
 
-  void selectAll(List<Product> products) {
-    final items = products
-        .map((product) => BarcodeItem(product: product, quantity: 1))
+  void selectAll(List<ProductVariantEntity> productsVariant) {
+    final items = productsVariant
+        .map((variant) => BarcodeItem(product: variant, quantity: 1))
         .toList();
 
     state = state.copyWith(items: items);

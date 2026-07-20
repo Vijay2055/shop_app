@@ -6,12 +6,12 @@ part 'category_entity.freezed.dart';
 @freezed
 abstract class CategoryEntity with _$CategoryEntity {
   const factory CategoryEntity({
-    required String id,
+    int? id,
     required String name,
     String? description,
-    @Default(0) int productCount,
+
     @Default(true) bool isActive,
-    required DateTime createdAt,
-    required DateTime updatedAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   }) = _CategoryEntity;
 }

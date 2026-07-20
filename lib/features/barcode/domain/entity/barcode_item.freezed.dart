@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$BarcodeItem {
 
- Product get product; int get quantity;
+ ProductVariantEntity get product; int get quantity;
 /// Create a copy of BarcodeItem
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -45,7 +45,7 @@ abstract mixin class $BarcodeItemCopyWith<$Res>  {
   factory $BarcodeItemCopyWith(BarcodeItem value, $Res Function(BarcodeItem) _then) = _$BarcodeItemCopyWithImpl;
 @useResult
 $Res call({
- Product product, int quantity
+ ProductVariantEntity product, int quantity
 });
 
 
@@ -65,7 +65,7 @@ class _$BarcodeItemCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') @override $Res call({Object? product = null,Object? quantity = null,}) {
   return _then(_self.copyWith(
 product: null == product ? _self.product : product // ignore: cast_nullable_to_non_nullable
-as Product,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
+as ProductVariantEntity,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -151,7 +151,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Product product,  int quantity)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ProductVariantEntity product,  int quantity)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _BarcodeItem() when $default != null:
 return $default(_that.product,_that.quantity);case _:
@@ -172,7 +172,7 @@ return $default(_that.product,_that.quantity);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Product product,  int quantity)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ProductVariantEntity product,  int quantity)  $default,) {final _that = this;
 switch (_that) {
 case _BarcodeItem():
 return $default(_that.product,_that.quantity);case _:
@@ -192,7 +192,7 @@ return $default(_that.product,_that.quantity);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Product product,  int quantity)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ProductVariantEntity product,  int quantity)?  $default,) {final _that = this;
 switch (_that) {
 case _BarcodeItem() when $default != null:
 return $default(_that.product,_that.quantity);case _:
@@ -210,7 +210,7 @@ class _BarcodeItem implements BarcodeItem {
   const _BarcodeItem({required this.product, this.quantity = 1});
   
 
-@override final  Product product;
+@override final  ProductVariantEntity product;
 @override@JsonKey() final  int quantity;
 
 /// Create a copy of BarcodeItem
@@ -243,7 +243,7 @@ abstract mixin class _$BarcodeItemCopyWith<$Res> implements $BarcodeItemCopyWith
   factory _$BarcodeItemCopyWith(_BarcodeItem value, $Res Function(_BarcodeItem) _then) = __$BarcodeItemCopyWithImpl;
 @override @useResult
 $Res call({
- Product product, int quantity
+ ProductVariantEntity product, int quantity
 });
 
 
@@ -263,7 +263,7 @@ class __$BarcodeItemCopyWithImpl<$Res>
 @override @pragma('vm:prefer-inline') $Res call({Object? product = null,Object? quantity = null,}) {
   return _then(_BarcodeItem(
 product: null == product ? _self.product : product // ignore: cast_nullable_to_non_nullable
-as Product,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
+as ProductVariantEntity,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
