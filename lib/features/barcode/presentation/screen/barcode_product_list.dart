@@ -148,8 +148,7 @@ class BarcodeProductList extends ConsumerWidget {
                                     CircleAvatar(
                                       radius: 18,
                                       child: Text(
-                                        product.size?.trim().substring(1, 1) ??
-                                            "P",
+                                        product.variant.trim().substring(1, 1) ,
                                       ),
                                     ),
 
@@ -157,7 +156,7 @@ class BarcodeProductList extends ConsumerWidget {
 
                                     Expanded(
                                       child: Text(
-                                        product.size ?? "-",
+                                        product.variant,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),

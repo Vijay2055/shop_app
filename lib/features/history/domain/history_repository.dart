@@ -1,23 +1,21 @@
-// import 'package:shop_app/core/utils/result.dart';
-// import 'package:shop_app/features/history/data/models/history_detail_model.dart';
-// import 'package:shop_app/features/history/data/models/history_model.dart';
-// import 'package:shop_app/features/history/datasource/history_data.dart';
+import 'package:shop_app/core/utils/result.dart';
+import 'package:shop_app/features/history/domain/entity/sale_history_detail_entity.dart';
+import 'package:shop_app/features/history/domain/entity/sale_history_entity.dart';
 
+abstract interface class SaleHistoryRepository {
+  Future<Result<List<SaleHistoryEntity>>> getSaleHistory({
+    required int page,
+    required int limit,
+    String? search,
+    String? paymentStatus,
+    
+  });
 
-// abstract class HistoryRepository {
-//   Future<Result<String>> createBill({
-//     required HistoryModel history,
-//     required List<PurchaseItem> item,
-//   });
+  Future<Result<int>> getSaleHistoryCount({String? search});
+  Future<Result<SaleHistoryDetailEntity?>> getSaleHistoryDetail(String saleId);
 
-//   Future<Result<List<HistoryModel>>> getAllHistory();
-
-//   Future<Result<HistoryDetailModel>> getHistoryDetail(String historyId);
-
-//   Future<Result<void>> deleteHistory(String historyId);
-
-//   Future<Result<void>> updateUdhar({
-//     required String historyId,
-//     required int? udharId,
-//   });
-// }
+  Future<Result<void>> receivePayment({
+    required String saleId,
+    required double amount,
+  });
+}

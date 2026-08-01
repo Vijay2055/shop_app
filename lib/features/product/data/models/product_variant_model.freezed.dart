@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ProductVariantModel {
 
- String get id;@JsonKey(name: 'product_id') String get productId; String get sku; String get barcode; String? get color; String? get size;@JsonKey(name: 'cost_price') double get costPrice;@JsonKey(name: 'selling_price') double get sellingPrice; double get mrp;@JsonKey(name: 'vat_percent') double get vatPercent;@JsonKey(name: 'discount_percent') double get discountPercent; int get stock;@JsonKey(name: 'minimum_stock') int get minimumStock;@JsonKey(name: 'is_active') bool get isActive;@JsonKey(name: 'created_at') DateTime get createdAt;@JsonKey(name: 'updated_at') DateTime get updatedAt;
+ String get id;@JsonKey(name: 'product_id') String get productId; String get sku; String get barcode; String? get color; String get variant;@JsonKey(name: 'cost_price') double get costPrice;@JsonKey(name: 'selling_price') double get sellingPrice; double get mrp;@JsonKey(name: 'vat_percent') double get vatPercent;@JsonKey(name: 'discount_percent') double get discountPercent; int get stock;@JsonKey(name: 'minimum_stock') int get minimumStock;@JsonKey(name: 'is_active') bool get isActive;@JsonKey(name: 'created_at') DateTime get createdAt;@JsonKey(name: 'updated_at') DateTime get updatedAt;
 /// Create a copy of ProductVariantModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $ProductVariantModelCopyWith<ProductVariantModel> get copyWith => _$ProductVaria
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProductVariantModel&&(identical(other.id, id) || other.id == id)&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.sku, sku) || other.sku == sku)&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.color, color) || other.color == color)&&(identical(other.size, size) || other.size == size)&&(identical(other.costPrice, costPrice) || other.costPrice == costPrice)&&(identical(other.sellingPrice, sellingPrice) || other.sellingPrice == sellingPrice)&&(identical(other.mrp, mrp) || other.mrp == mrp)&&(identical(other.vatPercent, vatPercent) || other.vatPercent == vatPercent)&&(identical(other.discountPercent, discountPercent) || other.discountPercent == discountPercent)&&(identical(other.stock, stock) || other.stock == stock)&&(identical(other.minimumStock, minimumStock) || other.minimumStock == minimumStock)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProductVariantModel&&(identical(other.id, id) || other.id == id)&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.sku, sku) || other.sku == sku)&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.color, color) || other.color == color)&&(identical(other.variant, variant) || other.variant == variant)&&(identical(other.costPrice, costPrice) || other.costPrice == costPrice)&&(identical(other.sellingPrice, sellingPrice) || other.sellingPrice == sellingPrice)&&(identical(other.mrp, mrp) || other.mrp == mrp)&&(identical(other.vatPercent, vatPercent) || other.vatPercent == vatPercent)&&(identical(other.discountPercent, discountPercent) || other.discountPercent == discountPercent)&&(identical(other.stock, stock) || other.stock == stock)&&(identical(other.minimumStock, minimumStock) || other.minimumStock == minimumStock)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,productId,sku,barcode,color,size,costPrice,sellingPrice,mrp,vatPercent,discountPercent,stock,minimumStock,isActive,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,productId,sku,barcode,color,variant,costPrice,sellingPrice,mrp,vatPercent,discountPercent,stock,minimumStock,isActive,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'ProductVariantModel(id: $id, productId: $productId, sku: $sku, barcode: $barcode, color: $color, size: $size, costPrice: $costPrice, sellingPrice: $sellingPrice, mrp: $mrp, vatPercent: $vatPercent, discountPercent: $discountPercent, stock: $stock, minimumStock: $minimumStock, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'ProductVariantModel(id: $id, productId: $productId, sku: $sku, barcode: $barcode, color: $color, variant: $variant, costPrice: $costPrice, sellingPrice: $sellingPrice, mrp: $mrp, vatPercent: $vatPercent, discountPercent: $discountPercent, stock: $stock, minimumStock: $minimumStock, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $ProductVariantModelCopyWith<$Res>  {
   factory $ProductVariantModelCopyWith(ProductVariantModel value, $Res Function(ProductVariantModel) _then) = _$ProductVariantModelCopyWithImpl;
 @useResult
 $Res call({
- String id,@JsonKey(name: 'product_id') String productId, String sku, String barcode, String? color, String? size,@JsonKey(name: 'cost_price') double costPrice,@JsonKey(name: 'selling_price') double sellingPrice, double mrp,@JsonKey(name: 'vat_percent') double vatPercent,@JsonKey(name: 'discount_percent') double discountPercent, int stock,@JsonKey(name: 'minimum_stock') int minimumStock,@JsonKey(name: 'is_active') bool isActive,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'updated_at') DateTime updatedAt
+ String id,@JsonKey(name: 'product_id') String productId, String sku, String barcode, String? color, String variant,@JsonKey(name: 'cost_price') double costPrice,@JsonKey(name: 'selling_price') double sellingPrice, double mrp,@JsonKey(name: 'vat_percent') double vatPercent,@JsonKey(name: 'discount_percent') double discountPercent, int stock,@JsonKey(name: 'minimum_stock') int minimumStock,@JsonKey(name: 'is_active') bool isActive,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'updated_at') DateTime updatedAt
 });
 
 
@@ -65,15 +65,15 @@ class _$ProductVariantModelCopyWithImpl<$Res>
 
 /// Create a copy of ProductVariantModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? productId = null,Object? sku = null,Object? barcode = null,Object? color = freezed,Object? size = freezed,Object? costPrice = null,Object? sellingPrice = null,Object? mrp = null,Object? vatPercent = null,Object? discountPercent = null,Object? stock = null,Object? minimumStock = null,Object? isActive = null,Object? createdAt = null,Object? updatedAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? productId = null,Object? sku = null,Object? barcode = null,Object? color = freezed,Object? variant = null,Object? costPrice = null,Object? sellingPrice = null,Object? mrp = null,Object? vatPercent = null,Object? discountPercent = null,Object? stock = null,Object? minimumStock = null,Object? isActive = null,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,productId: null == productId ? _self.productId : productId // ignore: cast_nullable_to_non_nullable
 as String,sku: null == sku ? _self.sku : sku // ignore: cast_nullable_to_non_nullable
 as String,barcode: null == barcode ? _self.barcode : barcode // ignore: cast_nullable_to_non_nullable
 as String,color: freezed == color ? _self.color : color // ignore: cast_nullable_to_non_nullable
-as String?,size: freezed == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
-as String?,costPrice: null == costPrice ? _self.costPrice : costPrice // ignore: cast_nullable_to_non_nullable
+as String?,variant: null == variant ? _self.variant : variant // ignore: cast_nullable_to_non_nullable
+as String,costPrice: null == costPrice ? _self.costPrice : costPrice // ignore: cast_nullable_to_non_nullable
 as double,sellingPrice: null == sellingPrice ? _self.sellingPrice : sellingPrice // ignore: cast_nullable_to_non_nullable
 as double,mrp: null == mrp ? _self.mrp : mrp // ignore: cast_nullable_to_non_nullable
 as double,vatPercent: null == vatPercent ? _self.vatPercent : vatPercent // ignore: cast_nullable_to_non_nullable
@@ -168,10 +168,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'product_id')  String productId,  String sku,  String barcode,  String? color,  String? size, @JsonKey(name: 'cost_price')  double costPrice, @JsonKey(name: 'selling_price')  double sellingPrice,  double mrp, @JsonKey(name: 'vat_percent')  double vatPercent, @JsonKey(name: 'discount_percent')  double discountPercent,  int stock, @JsonKey(name: 'minimum_stock')  int minimumStock, @JsonKey(name: 'is_active')  bool isActive, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'product_id')  String productId,  String sku,  String barcode,  String? color,  String variant, @JsonKey(name: 'cost_price')  double costPrice, @JsonKey(name: 'selling_price')  double sellingPrice,  double mrp, @JsonKey(name: 'vat_percent')  double vatPercent, @JsonKey(name: 'discount_percent')  double discountPercent,  int stock, @JsonKey(name: 'minimum_stock')  int minimumStock, @JsonKey(name: 'is_active')  bool isActive, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProductVariantModel() when $default != null:
-return $default(_that.id,_that.productId,_that.sku,_that.barcode,_that.color,_that.size,_that.costPrice,_that.sellingPrice,_that.mrp,_that.vatPercent,_that.discountPercent,_that.stock,_that.minimumStock,_that.isActive,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.productId,_that.sku,_that.barcode,_that.color,_that.variant,_that.costPrice,_that.sellingPrice,_that.mrp,_that.vatPercent,_that.discountPercent,_that.stock,_that.minimumStock,_that.isActive,_that.createdAt,_that.updatedAt);case _:
   return orElse();
 
 }
@@ -189,10 +189,10 @@ return $default(_that.id,_that.productId,_that.sku,_that.barcode,_that.color,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'product_id')  String productId,  String sku,  String barcode,  String? color,  String? size, @JsonKey(name: 'cost_price')  double costPrice, @JsonKey(name: 'selling_price')  double sellingPrice,  double mrp, @JsonKey(name: 'vat_percent')  double vatPercent, @JsonKey(name: 'discount_percent')  double discountPercent,  int stock, @JsonKey(name: 'minimum_stock')  int minimumStock, @JsonKey(name: 'is_active')  bool isActive, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'product_id')  String productId,  String sku,  String barcode,  String? color,  String variant, @JsonKey(name: 'cost_price')  double costPrice, @JsonKey(name: 'selling_price')  double sellingPrice,  double mrp, @JsonKey(name: 'vat_percent')  double vatPercent, @JsonKey(name: 'discount_percent')  double discountPercent,  int stock, @JsonKey(name: 'minimum_stock')  int minimumStock, @JsonKey(name: 'is_active')  bool isActive, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _ProductVariantModel():
-return $default(_that.id,_that.productId,_that.sku,_that.barcode,_that.color,_that.size,_that.costPrice,_that.sellingPrice,_that.mrp,_that.vatPercent,_that.discountPercent,_that.stock,_that.minimumStock,_that.isActive,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.productId,_that.sku,_that.barcode,_that.color,_that.variant,_that.costPrice,_that.sellingPrice,_that.mrp,_that.vatPercent,_that.discountPercent,_that.stock,_that.minimumStock,_that.isActive,_that.createdAt,_that.updatedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -209,10 +209,10 @@ return $default(_that.id,_that.productId,_that.sku,_that.barcode,_that.color,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'product_id')  String productId,  String sku,  String barcode,  String? color,  String? size, @JsonKey(name: 'cost_price')  double costPrice, @JsonKey(name: 'selling_price')  double sellingPrice,  double mrp, @JsonKey(name: 'vat_percent')  double vatPercent, @JsonKey(name: 'discount_percent')  double discountPercent,  int stock, @JsonKey(name: 'minimum_stock')  int minimumStock, @JsonKey(name: 'is_active')  bool isActive, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'product_id')  String productId,  String sku,  String barcode,  String? color,  String variant, @JsonKey(name: 'cost_price')  double costPrice, @JsonKey(name: 'selling_price')  double sellingPrice,  double mrp, @JsonKey(name: 'vat_percent')  double vatPercent, @JsonKey(name: 'discount_percent')  double discountPercent,  int stock, @JsonKey(name: 'minimum_stock')  int minimumStock, @JsonKey(name: 'is_active')  bool isActive, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _ProductVariantModel() when $default != null:
-return $default(_that.id,_that.productId,_that.sku,_that.barcode,_that.color,_that.size,_that.costPrice,_that.sellingPrice,_that.mrp,_that.vatPercent,_that.discountPercent,_that.stock,_that.minimumStock,_that.isActive,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.productId,_that.sku,_that.barcode,_that.color,_that.variant,_that.costPrice,_that.sellingPrice,_that.mrp,_that.vatPercent,_that.discountPercent,_that.stock,_that.minimumStock,_that.isActive,_that.createdAt,_that.updatedAt);case _:
   return null;
 
 }
@@ -224,7 +224,7 @@ return $default(_that.id,_that.productId,_that.sku,_that.barcode,_that.color,_th
 @JsonSerializable()
 
 class _ProductVariantModel implements ProductVariantModel {
-  const _ProductVariantModel({required this.id, @JsonKey(name: 'product_id') required this.productId, required this.sku, required this.barcode, this.color, this.size, @JsonKey(name: 'cost_price') required this.costPrice, @JsonKey(name: 'selling_price') required this.sellingPrice, required this.mrp, @JsonKey(name: 'vat_percent') this.vatPercent = 0, @JsonKey(name: 'discount_percent') this.discountPercent = 0, this.stock = 0, @JsonKey(name: 'minimum_stock') this.minimumStock = 5, @JsonKey(name: 'is_active') this.isActive = true, @JsonKey(name: 'created_at') required this.createdAt, @JsonKey(name: 'updated_at') required this.updatedAt});
+  const _ProductVariantModel({required this.id, @JsonKey(name: 'product_id') required this.productId, required this.sku, required this.barcode, this.color, required this.variant, @JsonKey(name: 'cost_price') required this.costPrice, @JsonKey(name: 'selling_price') required this.sellingPrice, required this.mrp, @JsonKey(name: 'vat_percent') this.vatPercent = 0, @JsonKey(name: 'discount_percent') this.discountPercent = 0, this.stock = 0, @JsonKey(name: 'minimum_stock') this.minimumStock = 5, @JsonKey(name: 'is_active') this.isActive = true, @JsonKey(name: 'created_at') required this.createdAt, @JsonKey(name: 'updated_at') required this.updatedAt});
   factory _ProductVariantModel.fromJson(Map<String, dynamic> json) => _$ProductVariantModelFromJson(json);
 
 @override final  String id;
@@ -232,7 +232,7 @@ class _ProductVariantModel implements ProductVariantModel {
 @override final  String sku;
 @override final  String barcode;
 @override final  String? color;
-@override final  String? size;
+@override final  String variant;
 @override@JsonKey(name: 'cost_price') final  double costPrice;
 @override@JsonKey(name: 'selling_price') final  double sellingPrice;
 @override final  double mrp;
@@ -257,16 +257,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProductVariantModel&&(identical(other.id, id) || other.id == id)&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.sku, sku) || other.sku == sku)&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.color, color) || other.color == color)&&(identical(other.size, size) || other.size == size)&&(identical(other.costPrice, costPrice) || other.costPrice == costPrice)&&(identical(other.sellingPrice, sellingPrice) || other.sellingPrice == sellingPrice)&&(identical(other.mrp, mrp) || other.mrp == mrp)&&(identical(other.vatPercent, vatPercent) || other.vatPercent == vatPercent)&&(identical(other.discountPercent, discountPercent) || other.discountPercent == discountPercent)&&(identical(other.stock, stock) || other.stock == stock)&&(identical(other.minimumStock, minimumStock) || other.minimumStock == minimumStock)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProductVariantModel&&(identical(other.id, id) || other.id == id)&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.sku, sku) || other.sku == sku)&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.color, color) || other.color == color)&&(identical(other.variant, variant) || other.variant == variant)&&(identical(other.costPrice, costPrice) || other.costPrice == costPrice)&&(identical(other.sellingPrice, sellingPrice) || other.sellingPrice == sellingPrice)&&(identical(other.mrp, mrp) || other.mrp == mrp)&&(identical(other.vatPercent, vatPercent) || other.vatPercent == vatPercent)&&(identical(other.discountPercent, discountPercent) || other.discountPercent == discountPercent)&&(identical(other.stock, stock) || other.stock == stock)&&(identical(other.minimumStock, minimumStock) || other.minimumStock == minimumStock)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,productId,sku,barcode,color,size,costPrice,sellingPrice,mrp,vatPercent,discountPercent,stock,minimumStock,isActive,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,productId,sku,barcode,color,variant,costPrice,sellingPrice,mrp,vatPercent,discountPercent,stock,minimumStock,isActive,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'ProductVariantModel(id: $id, productId: $productId, sku: $sku, barcode: $barcode, color: $color, size: $size, costPrice: $costPrice, sellingPrice: $sellingPrice, mrp: $mrp, vatPercent: $vatPercent, discountPercent: $discountPercent, stock: $stock, minimumStock: $minimumStock, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'ProductVariantModel(id: $id, productId: $productId, sku: $sku, barcode: $barcode, color: $color, variant: $variant, costPrice: $costPrice, sellingPrice: $sellingPrice, mrp: $mrp, vatPercent: $vatPercent, discountPercent: $discountPercent, stock: $stock, minimumStock: $minimumStock, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -277,7 +277,7 @@ abstract mixin class _$ProductVariantModelCopyWith<$Res> implements $ProductVari
   factory _$ProductVariantModelCopyWith(_ProductVariantModel value, $Res Function(_ProductVariantModel) _then) = __$ProductVariantModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id,@JsonKey(name: 'product_id') String productId, String sku, String barcode, String? color, String? size,@JsonKey(name: 'cost_price') double costPrice,@JsonKey(name: 'selling_price') double sellingPrice, double mrp,@JsonKey(name: 'vat_percent') double vatPercent,@JsonKey(name: 'discount_percent') double discountPercent, int stock,@JsonKey(name: 'minimum_stock') int minimumStock,@JsonKey(name: 'is_active') bool isActive,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'updated_at') DateTime updatedAt
+ String id,@JsonKey(name: 'product_id') String productId, String sku, String barcode, String? color, String variant,@JsonKey(name: 'cost_price') double costPrice,@JsonKey(name: 'selling_price') double sellingPrice, double mrp,@JsonKey(name: 'vat_percent') double vatPercent,@JsonKey(name: 'discount_percent') double discountPercent, int stock,@JsonKey(name: 'minimum_stock') int minimumStock,@JsonKey(name: 'is_active') bool isActive,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'updated_at') DateTime updatedAt
 });
 
 
@@ -294,15 +294,15 @@ class __$ProductVariantModelCopyWithImpl<$Res>
 
 /// Create a copy of ProductVariantModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? productId = null,Object? sku = null,Object? barcode = null,Object? color = freezed,Object? size = freezed,Object? costPrice = null,Object? sellingPrice = null,Object? mrp = null,Object? vatPercent = null,Object? discountPercent = null,Object? stock = null,Object? minimumStock = null,Object? isActive = null,Object? createdAt = null,Object? updatedAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? productId = null,Object? sku = null,Object? barcode = null,Object? color = freezed,Object? variant = null,Object? costPrice = null,Object? sellingPrice = null,Object? mrp = null,Object? vatPercent = null,Object? discountPercent = null,Object? stock = null,Object? minimumStock = null,Object? isActive = null,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_ProductVariantModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,productId: null == productId ? _self.productId : productId // ignore: cast_nullable_to_non_nullable
 as String,sku: null == sku ? _self.sku : sku // ignore: cast_nullable_to_non_nullable
 as String,barcode: null == barcode ? _self.barcode : barcode // ignore: cast_nullable_to_non_nullable
 as String,color: freezed == color ? _self.color : color // ignore: cast_nullable_to_non_nullable
-as String?,size: freezed == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
-as String?,costPrice: null == costPrice ? _self.costPrice : costPrice // ignore: cast_nullable_to_non_nullable
+as String?,variant: null == variant ? _self.variant : variant // ignore: cast_nullable_to_non_nullable
+as String,costPrice: null == costPrice ? _self.costPrice : costPrice // ignore: cast_nullable_to_non_nullable
 as double,sellingPrice: null == sellingPrice ? _self.sellingPrice : sellingPrice // ignore: cast_nullable_to_non_nullable
 as double,mrp: null == mrp ? _self.mrp : mrp // ignore: cast_nullable_to_non_nullable
 as double,vatPercent: null == vatPercent ? _self.vatPercent : vatPercent // ignore: cast_nullable_to_non_nullable

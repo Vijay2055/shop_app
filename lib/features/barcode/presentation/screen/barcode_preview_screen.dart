@@ -220,7 +220,7 @@ class BarcodePreviewScreen extends ConsumerWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                item.product.size ?? "variant",
+                                item.product.variant,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(

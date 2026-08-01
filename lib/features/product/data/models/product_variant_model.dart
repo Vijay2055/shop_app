@@ -20,7 +20,7 @@ abstract class ProductVariantModel with _$ProductVariantModel {
 
     String? color,
 
-    String? size,
+    required String variant,
 
     @JsonKey(name: 'cost_price') required double costPrice,
 
@@ -53,7 +53,7 @@ abstract class ProductVariantModel with _$ProductVariantModel {
       sku: entity.sku,
       barcode: entity.barcode,
       color: entity.color,
-      size: entity.size,
+      variant: entity.variant,
       costPrice: entity.costPrice,
       sellingPrice: entity.sellingPrice,
       mrp: entity.mrp,
@@ -76,7 +76,7 @@ extension ProductVariantModelX on ProductVariantModel {
       sku: sku,
       barcode: barcode,
       color: color,
-      size: size,
+      variant: variant,
       costPrice: costPrice,
       sellingPrice: sellingPrice,
       mrp: mrp,
@@ -99,7 +99,7 @@ extension ProductVariantTableX on ProductVariant {
       sku: sku,
       barcode: barcode,
       color: color,
-      size: size,
+      variant: variant,
       costPrice: costPrice,
       sellingPrice: sellingPrice,
       mrp: mrp,
@@ -127,7 +127,7 @@ extension ProductVariantModelToCompanion on ProductVariantModel {
       sku: sku,
       barcode: barcode,
       color: Value(color),
-      size: Value(size),
+      variant: variant,
       costPrice: Value(costPrice),
       sellingPrice: Value(sellingPrice),
       mrp: Value(mrp),
@@ -151,7 +151,7 @@ extension ProductVariantModelToDrift on ProductVariantModel {
       sku: sku,
       barcode: barcode,
       color: color,
-      size: size,
+      variant: variant,
       costPrice: costPrice,
       sellingPrice: sellingPrice,
       mrp: mrp,

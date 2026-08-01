@@ -1,138 +1,83 @@
-// import 'package:shop_app/core/errors/failure.dart';
-// import 'package:shop_app/core/utils/result.dart';
-// import 'package:shop_app/features/history/data/models/history_detail_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shop_app/core/errors/failure.dart';
+import 'package:shop_app/core/utils/result.dart';
+import 'package:shop_app/features/history/data/models/sales_history_mapper.dart';
+import 'package:shop_app/features/history/datasource/sale_history_local_datasource.dart';
+import 'package:shop_app/features/history/domain/entity/sale_history_detail_entity.dart';
+import 'package:shop_app/features/history/domain/entity/sale_history_entity.dart';
+import 'package:shop_app/features/history/domain/history_repository.dart';
 
-// import 'package:shop_app/features/history/data/models/history_model.dart';
-// import 'package:shop_app/features/history/datasource/history_data.dart';
-// import 'package:shop_app/features/history/domain/history_repository.dart';
+class SaleHistoryRepositoryImpl implements SaleHistoryRepository {
+  final SaleHistoryLocalDataSource _localDataSource;
 
-// class HistoryRepositoryImpl implements HistoryRepository {
-//   final HistoryDatasource datasource;
+  SaleHistoryRepositoryImpl(this._localDataSource);
 
-//   HistoryRepositoryImpl(this.datasource);
+  @override
+  Future<Result<List<SaleHistoryEntity>>> getSaleHistory({
+    required int page,
+    required int limit,
+    String? search,
+    String? paymentStatus,
+  }) async {
+    try {
+      final rows = await _localDataSource.getSaleHistory(
+        page: page,
+        limit: limit,
+        search: search,
+        paymentStatus: paymentStatus,
+      );
 
-//   // =====================================================
-//   // CREATE BILL
-//   // =====================================================
-//   @override
-//   Future<Result<String>> createBill({
-//     required HistoryModel history,
-//     required List<PurchaseItem> item,
-//   }) async {
-//     try {
-//       final result = await datasource.createBill(history: history, items: item);
-       
-//        if(result.data == null) {
-//         throw Exception("Failed to get bill id");
-//        }
+      final history = rows.map((e) => e.toEntity()).toList();
 
-//       if (result.isSuccess && result.data != null) {
-//         return Result.success(result.data);
-//       }
+      return Success(history);
+    } catch (e) {
+      return FailureResult(DatabaseFailure("Unable to load sale history: $e"));
+    }
+  }
 
-//       return Result.failure(result.error!);
-//     } catch (e) {
-//       return Result.failure(DatabaseFailure(e.toString()));
-//     }
-//   }
+  @override
+  Future<Result<int>> getSaleHistoryCount({String? search}) async {
+    try {
+      final count = await _localDataSource.getSaleHistoryCount(search: search);
 
-//   // =====================================================
-//   // GET ALL HISTORY
-//   // =====================================================
-//   @override
-//   Future<Result<List<HistoryModel>>> getAllHistory() async {
-//     try {
-//       final result = await datasource.getAllHistory();
+      return Success(count);
+    } catch (e) {
+      return FailureResult(
+        DatabaseFailure("Unable to get sale history count: $e"),
+      );
+    }
+  }
 
-//       if (result.isSuccess) {
-//         // convert DB model → domain model
-//         final data = result.data!
-//             .map((e) => HistoryModel.fromDrift(e))
-//             .toList();
+  @override
+  Future<Result<SaleHistoryDetailEntity?>> getSaleHistoryDetail(
+    String saleId,
+  ) async {
+    try {
+      final result = await _localDataSource.getSaleHistoryDetail(saleId);
 
-//         return Result.success(data);
-//       }
+      return Success(result);
+    } catch (e) {
+      return FailureResult(DatabaseFailure(e.toString()));
+    }
+  }
 
-//       return Result.failure(result.error!);
-//     } catch (e) {
-//       return Result.failure(DatabaseFailure(e.toString()));
-//     }
-//   }
+  @override
+  Future<Result<void>> receivePayment({
+    required String saleId,
+    required double amount,
+  }) async {
+    try {
+      await _localDataSource.receivePayment(saleId: saleId, amount: amount);
 
-//   // =====================================================
-//   // GET HISTORY DETAIL
-//   // =====================================================
-//   @override
-//   Future<Result<HistoryDetailModel>> getHistoryDetail(String historyId) async {
-//     try {
-//       final result = await datasource.getBillDetail(historyId);
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(DatabaseFailure(e.toString()));
+    }
+  }
+}
 
-//       if (result.isSuccess) {
-//         final historyDetail = result.data;
-//         final mappedHistoryDetail = HistoryDetailModel(
-//           id: historyDetail!.history.id,
-//           date: historyDetail.history.createdAt,
-//           totalAmount: historyDetail.history.total,
-//           status: historyDetail.history.status,
-//           items: historyDetail.items
-//               .map(
-//                 (e) => PurchaseItem(
-//                   productId: e.productId,
-//                   quantity: e.quantity,
-//                   priceAtPurchase: e.priceAtPurchase,
-//                   productName: e.productName,
-//                 ),
-//               )
-//               .toList(),
-//         );
-//         return Result.success(mappedHistoryDetail);
-//       }
-
-//       return Result.failure(result.error!);
-//     } catch (e) {
-//       return Result.failure(DatabaseFailure(e.toString()));
-//     }
-//   }
-
-//   // =====================================================
-//   // DELETE HISTORY
-//   // =====================================================
-//   @override
-//   Future<Result<void>> deleteHistory(String historyId) async {
-//     try {
-//       final result = await datasource.deleteBill(historyId);
-
-//       if (result.isSuccess) {
-//         return Result.success(null);
-//       }
-
-//       return Result.failure(result.error!);
-//     } catch (e) {
-//       return Result.failure(DatabaseFailure(e.toString()));
-//     }
-//   }
-
-//   // =====================================================
-//   // UPDATE UDHAR
-//   // =====================================================
-//   @override
-//   Future<Result<void>> updateUdhar({
-//     required String historyId,
-//     required int? udharId,
-//   }) async {
-//     try {
-//       final result = await datasource.updateUdhar(
-//         billId: historyId,
-//         udharId: udharId,
-//       );
-
-//       if (result.isSuccess) {
-//         return Result.success(null);
-//       }
-
-//       return Result.failure(result.error!);
-//     } catch (e) {
-//       return Result.failure(DatabaseFailure(e.toString()));
-//     }
-//   }
-// }
+final saleHistoryRepositoryProvider = Provider<SaleHistoryRepository>((ref) {
+  return SaleHistoryRepositoryImpl(
+    ref.watch(salseHisoryLocalDataSourcceProvider),
+  );
+});

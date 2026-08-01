@@ -377,7 +377,7 @@ class ProductLocalDataSourceImpl implements ProductLocalDataSource {
   Future<List<ProductVariant>> searchProductVariants(String query) async {
     return await (_database.select(_database.productVariants)..where(
           (tbl) =>
-              tbl.size.like('%$query%') |
+              tbl.variant.like('%$query%') |
               tbl.barcode.like('%$query%') |
               tbl.sku.like('%$query%') & tbl.isActive.equals(true),
         ))

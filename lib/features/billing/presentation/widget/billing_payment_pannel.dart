@@ -1,325 +1,484 @@
-// import 'package:flutter/material.dart';
-// import 'package:flutter/services.dart';
-// import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:shop_app/features/cart/application/cart_notifier.dart';
-// import 'package:shop_app/features/udhar/presentation/providers/selected_udhar_provider.dart';
-// import 'package:shop_app/features/udhar/presentation/providers/udhar_provider.dart';
+import 'dart:math';
 
-// class BillingPaymentPannel extends ConsumerWidget {
-//   const BillingPaymentPannel({super.key});
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shop_app/features/billing/application/billing_notifier.dart';
+import 'package:shop_app/features/cart/application/cart_notifier.dart';
+import 'package:shop_app/features/customer/domain/entity/customer_entity.dart';
+import 'package:uuid/uuid.dart';
 
-//   @override
-//   Widget build(BuildContext context, WidgetRef ref) {
-//     final cartState = ref.watch(cartProvider);
+class BillingPaymentPannel extends ConsumerWidget {
+  const BillingPaymentPannel({super.key});
 
-//     return Container(
-//       margin: const EdgeInsets.all(12),
-//       padding: const EdgeInsets.all(16),
-//       decoration: BoxDecoration(
-//         color: Colors.white,
-//         borderRadius: BorderRadius.circular(12),
-//         boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6)],
-//       ),
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           const Text(
-//             "Payment",
-//             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-//           ),
+  void _onPressed(
+    BuildContext context,
+    WidgetRef ref,
+    double receivedAmount,
+  ) async {
+    ref.read(billingProvider.notifier).generateBill(receivedAmount);
 
-//           const SizedBox(height: 25),
+    // try {
+    //   final selectedUdhar = ref.read(selectedUdharProvider);
+    //   if (cartState.items.isEmpty) {
+    //     ScaffoldMessenger.of(
+    //       context,
+    //     ).showSnackBar(const SnackBar(content: Text("Cart is empty")));
+    //     return;
+    //   }
 
-//           /// TOTAL
-//           Text(
-//             "₹${cartState.totalAmount.toStringAsFixed(2)}",
-//             style: const TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
-//           ),
+    //   /// CREATE BILL
+    //   final bill = await ref
+    //       .read(historyProvider.notifier)
+    //       .createBill(
+    //         items: cartState.items,
+    //         total: cartState.totalAmount,
+    //         udharId: selectedUdhar,
+    //         status: selectedUdhar == null ? "completed" : "pending",
+    //       );
 
-//           const SizedBox(height: 25),
+    //   /// BUILD RECEIPT
+    //   final builder = PosReceiptBuilder();
 
-//           const SizedBox(height: 30),
+    //   final bytes = await builder.buildReceipt(
+    //     billNumber: bill,
+    //     cart: cartState.items,
+    //     total: cartState.totalAmount,
+    //   );
 
-//           /// CLEAR BUTTON
-//           SizedBox(
-//             width: double.infinity,
-//             child: ElevatedButton(
-//               onPressed: () {
-//                 _showWarningDialog(context, ref);
-//               },
-//               style: ElevatedButton.styleFrom(
-//                 backgroundColor: Colors.red,
-//                 padding: const EdgeInsets.symmetric(vertical: 14),
-//                 shape: RoundedRectangleBorder(
-//                   borderRadius: BorderRadius.circular(10),
-//                 ),
-//               ),
-//               child: const Text(
-//                 "Clear",
-//                 style: TextStyle(
-//                   fontSize: 16,
-//                   fontWeight: FontWeight.w600,
-//                   color: Colors.white,
-//                 ),
-//               ),
-//             ),
-//           ),
-//           const SizedBox(height: 12),
+    //   /// ADD TO PRINT QUEUE
+    //   ref.read(printQueueProvider).addJob(PrintJob(billId: bill, bytes: bytes));
 
-//           SizedBox(
-//             width: double.infinity,
-//             child: ElevatedButton(
-//               onPressed: () {
-//                 _showCreditDialog(context, ref);
-//               },
-//               style: ElevatedButton.styleFrom(
-//                 backgroundColor: Color(0xFF1F2937),
-//                 padding: const EdgeInsets.symmetric(vertical: 14),
-//                 shape: RoundedRectangleBorder(
-//                   borderRadius: BorderRadius.circular(10),
-//                 ),
-//               ),
-//               child: const Text(
-//                 "Udhaar Entry",
-//                 style: TextStyle(
-//                   fontSize: 16,
-//                   fontWeight: FontWeight.w600,
-//                   color: Colors.white,
-//                 ),
-//               ),
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
+    //   /// CLEAR STATE
+    //   ref.read(cartProvider.notifier).clearCart();
 
-//   void _showWarningDialog(BuildContext context, WidgetRef ref) {
-//     showDialog(
-//       context: context,
-//       barrierDismissible: true,
-//       builder: (context) {
-//         return AlertDialog(
-//           title: const Text("Are you sure?"),
-//           content: const Text(
-//             "This will clear the current cart and cannot be undone.",
-//           ),
-//           actions: [
-//             TextButton(
-//               onPressed: () {
-//                 Navigator.pop(context);
-//               },
-//               child: const Text("No"),
-//             ),
-//             TextButton(
-//               onPressed: () {
-//                 Navigator.pop(context);
+    //   ref.read(selectedUdharProvider.notifier).clear();
 
-//                 /// Clear the cart
-//                 ref.read(cartProvider.notifier).clearCart();
-//               },
-//               child: const Text("Yes"),
-//             ),
-//           ],
-//         );
-//       },
-//     );
-//   }
+    //   if (context.mounted) {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       const SnackBar(content: Text("Receipt added to print queue")),
+    //     );
+    //   }
+    // } catch (e) {
+    //   if (context.mounted) {
+    //     ScaffoldMessenger.of(
+    //       context,
+    //     ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    //   }
+    // }
+  }
 
-//   void _showCreditDialog(BuildContext context, WidgetRef ref) {
-//     final formKey = GlobalKey<FormState>();
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cartState = ref.watch(cartProvider);
 
-//     final nameController = TextEditingController();
-//     final phoneController = TextEditingController();
-//     final addressController = TextEditingController();
+    final billingState = ref.watch(billingProvider);
 
-//     showDialog(
-//       context: context,
-//       barrierDismissible: true,
-//       builder: (context) {
-//         return Dialog(
-//           shape: RoundedRectangleBorder(
-//             borderRadius: BorderRadius.circular(20),
-//           ),
-//           child: Container(
-//             padding: const EdgeInsets.all(30),
-//             width: 430,
-//             child: Form(
-//               key: formKey,
-//               child: Column(
-//                 mainAxisSize: MainAxisSize.min,
-//                 children: [
-//                   /// HEADER
-//                   Row(
-//                     children: const [
-//                       Icon(Icons.person_add_alt_1, color: Color(0xFF1F2937)),
-//                       SizedBox(width: 10),
-//                       Text(
-//                         "Add to Udhaar",
-//                         style: TextStyle(
-//                           fontSize: 18,
-//                           fontWeight: FontWeight.bold,
-//                         ),
-//                       ),
-//                     ],
-//                   ),
+    final due = max(0, cartState.totalAmount - billingState.receivedAmount);
 
-//                   const SizedBox(height: 20),
+    final change = max(0, billingState.receivedAmount - cartState.totalAmount);
 
-//                   /// NAME
-//                   TextFormField(
-//                     controller: nameController,
-//                     textCapitalization: TextCapitalization.words,
-//                     validator: (value) {
-//                       if (value == null || value.trim().isEmpty) {
-//                         return "Customer name is required";
-//                       }
+    return Container(
+      margin: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Payment",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          ),
 
-//                       if (value.trim().length < 3) {
-//                         return "Name must be at least 3 characters";
-//                       }
+          const SizedBox(height: 25),
 
-//                       if (!RegExp(r"^[a-zA-Z\s]+$").hasMatch(value.trim())) {
-//                         return "Enter a valid customer name";
-//                       }
+          /// TOTAL
+          Text(
+            "₹${cartState.totalAmount.toStringAsFixed(2)}",
+            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+          ),
 
-//                       return null;
-//                     },
-//                     decoration: InputDecoration(
-//                       prefixIcon: const Icon(Icons.person),
-//                       labelText: "Customer Name",
-//                       border: OutlineInputBorder(
-//                         borderRadius: BorderRadius.circular(12),
-//                       ),
-//                     ),
-//                   ),
+          SizedBox(height: 25),
 
-//                   const SizedBox(height: 12),
+          TextFormField(
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}$')),
+              LengthLimitingTextInputFormatter(10),
+            ],
+            onChanged: (value) {
+              final amount = double.tryParse(value) ?? 0;
+              ref.read(billingProvider.notifier).updateReceivedAmount(amount);
+            },
+            decoration: const InputDecoration(
+              labelText: "Received Amount",
+              prefixText: "₹ ",
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 16),
 
-//                   /// PHONE
-//                   TextFormField(
-//                     controller: phoneController,
-//                     keyboardType: TextInputType.phone,
-//                     inputFormatters: [
-//                       FilteringTextInputFormatter.digitsOnly,
-//                       LengthLimitingTextInputFormatter(10),
-//                     ],
-//                     validator: (value) {
-//                       if (value == null || value.trim().isEmpty) {
-//                         return "Phone number is required";
-//                       }
+          Container(
+            margin: const EdgeInsets.only(top: 12),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: due > 0 ? Colors.orange.shade50 : Colors.green.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: due > 0 ? Colors.orange.shade300 : Colors.green.shade300,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      due > 0
+                          ? Icons.warning_amber_rounded
+                          : Icons.currency_exchange,
+                      size: 20,
+                      color: due > 0 ? Colors.orange : Colors.green,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      due > 0 ? "Amount Due" : "Change to Return",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                  ],
+                ),
 
-//                       if (!RegExp(r'^[0-9]{10}$').hasMatch(value.trim())) {
-//                         return "Enter a valid 10-digit phone number";
-//                       }
+                const SizedBox(height: 10),
 
-//                       return null;
-//                     },
-//                     decoration: InputDecoration(
-//                       prefixIcon: const Icon(Icons.phone),
-//                       labelText: "Phone Number",
-//                       border: OutlineInputBorder(
-//                         borderRadius: BorderRadius.circular(12),
-//                       ),
-//                     ),
-//                   ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    "₹${(due > 0 ? due : change).toStringAsFixed(2)}",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: due > 0
+                          ? Colors.orange.shade800
+                          : Colors.green.shade800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
 
-//                   const SizedBox(height: 12),
+          const SizedBox(height: 25),
 
-//                   /// ADDRESS
-//                   TextFormField(
-//                     controller: addressController,
-//                     maxLines: 2,
-//                     validator: (value) {
-//                       if (value != null &&
-//                           value.trim().isNotEmpty &&
-//                           value.trim().length < 5) {
-//                         return "Address is too short";
-//                       }
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                _showCreditDialog(context, ref);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF1F2937),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: const Text(
+                "Customer Detail",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
 
-//                       return null;
-//                     },
-//                     decoration: InputDecoration(
-//                       prefixIcon: const Icon(Icons.location_on),
-//                       labelText: "Address",
-//                       border: OutlineInputBorder(
-//                         borderRadius: BorderRadius.circular(12),
-//                       ),
-//                     ),
-//                   ),
+          Spacer(),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    _showWarningDialog(context, ref);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    "Clear",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 20),
 
-//                   const SizedBox(height: 20),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () =>
+                      _onPressed(context, ref, billingState.receivedAmount),
 
-//                   /// BUTTONS
-//                   Row(
-//                     children: [
-//                       Expanded(
-//                         child: OutlinedButton(
-//                           onPressed: () => Navigator.pop(context),
-//                           style: OutlinedButton.styleFrom(
-//                             padding: const EdgeInsets.symmetric(vertical: 14),
-//                             shape: RoundedRectangleBorder(
-//                               borderRadius: BorderRadius.circular(12),
-//                             ),
-//                           ),
-//                           child: const Text("Cancel"),
-//                         ),
-//                       ),
-//                       const SizedBox(width: 10),
-//                       Expanded(
-//                         child: ElevatedButton(
-//                           onPressed: () async {
-//                             FocusScope.of(context).unfocus();
+                  icon: const Icon(Icons.print, color: Colors.white),
+                  label: const Text(
+                    "Print",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    backgroundColor: Color.fromARGB(255, 7, 37, 94),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
-//                             if (!formKey.currentState!.validate()) {
-//                               return;
-//                             }
+  void _showWarningDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Are you sure?"),
+          content: const Text(
+            "This will clear the current cart and cannot be undone.",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("No"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
 
-//                             final name = nameController.text.trim();
-//                             final phone = phoneController.text.trim();
-//                             final address = addressController.text.trim();
+                /// Clear the cart
+                // ref.read(cartProvider.notifier).clearCart();
+              },
+              child: const Text("Yes"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
-//                             final id = await ref
-//                                 .read(udharNotifierProvider.notifier)
-//                                 .addCustomer(
-//                                   name: name,
-//                                   phone: phone,
-//                                   address: address,
-//                                 );
-//                             if (id == null) {
-//                               return;
-//                             }
-//                             ref.read(selectedUdharProvider.notifier).select(id);
+  void _showCreditDialog(BuildContext context, WidgetRef ref) {
+    final formKey = GlobalKey<FormState>();
 
-//                             Navigator.pop(context);
+    final nameController = TextEditingController();
+    final phoneController = TextEditingController();
+    final addressController = TextEditingController();
 
-//                             ScaffoldMessenger.of(context).showSnackBar(
-//                               const SnackBar(
-//                                 content: Text("Customer added successfully"),
-//                               ),
-//                             );
-//                           },
-//                           style: ElevatedButton.styleFrom(
-//                             backgroundColor: Color(0xFF1F2937),
-//                             padding: const EdgeInsets.symmetric(vertical: 14),
-//                             shape: RoundedRectangleBorder(
-//                               borderRadius: BorderRadius.circular(12),
-//                             ),
-//                           ),
-//                           child: const Text(
-//                             "Save",
-//                             style: TextStyle(color: Colors.white),
-//                           ),
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           ),
-//         );
-//       },
-//     );
-//   }
-// }
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(30),
+            width: 430,
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  /// HEADER
+                  Row(
+                    children: const [
+                      Icon(Icons.person_add_alt_1, color: Color(0xFF1F2937)),
+                      SizedBox(width: 10),
+                      Text(
+                        "Add to Udhaar",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  /// NAME
+                  TextFormField(
+                    controller: nameController,
+                    textCapitalization: TextCapitalization.words,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return "Customer name is required";
+                      }
+
+                      if (value.trim().length < 3) {
+                        return "Name must be at least 3 characters";
+                      }
+
+                      if (!RegExp(r"^[a-zA-Z\s]+$").hasMatch(value.trim())) {
+                        return "Enter a valid customer name";
+                      }
+
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.person),
+                      labelText: "Customer Name",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  /// PHONE
+                  TextFormField(
+                    controller: phoneController,
+                    keyboardType: TextInputType.phone,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(10),
+                    ],
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return "Phone number is required";
+                      }
+
+                      if (!RegExp(r'^[0-9]{10}$').hasMatch(value.trim())) {
+                        return "Enter a valid 10-digit phone number";
+                      }
+
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.phone),
+                      labelText: "Phone Number",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  /// ADDRESS
+                  TextFormField(
+                    controller: addressController,
+                    maxLines: 2,
+                    validator: (value) {
+                      if (value != null &&
+                          value.trim().isNotEmpty &&
+                          value.trim().length < 5) {
+                        return "Address is too short";
+                      }
+
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.location_on),
+                      labelText: "Address",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  /// BUTTONS
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text("Cancel"),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            FocusScope.of(context).unfocus();
+
+                            if (!formKey.currentState!.validate()) {
+                              return;
+                            }
+
+                            final name = nameController.text.trim();
+                            final phone = phoneController.text.trim();
+                            final address = addressController.text.trim();
+
+                            final customer = CustomerEntity(
+                              id: const Uuid().v4(),
+                              name: name,
+                              phone: phone,
+                              address: address,
+                              isActive: true,
+                              createdAt: DateTime.now(),
+                              updatedAt: DateTime.now(),
+                            );
+
+                            ref
+                                .read(billingProvider.notifier)
+                                .setCustomer(customer);
+
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFF1F2937),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            "Save",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}

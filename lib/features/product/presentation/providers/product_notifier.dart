@@ -88,7 +88,3 @@ class ProductNotifier extends AsyncNotifier<ProductState> {
   }
 }
 
-final productNotifierProvider =
-    AsyncNotifierProvider.autoDispose<ProductNotifier, ProductState>(
-      ProductNotifier.new,
-    );

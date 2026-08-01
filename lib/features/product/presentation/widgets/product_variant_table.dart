@@ -128,7 +128,7 @@ class ProductVariantTable extends StatelessWidget {
 
                               DataCell(Text(item.barcode.toString())),
 
-                              DataCell(Text(item.size.toString())),
+                              DataCell(Text(item.variant.toString())),
 
                               DataCell(Text(item.costPrice.toString())),
 

@@ -45,7 +45,7 @@ class _AddVariantScreenState extends State<AddVariantScreen> {
       skuController.text = widget.variantDraft!.sku;
       barcodeController.text = widget.variantDraft!.barcode;
       colorController.text = widget.variantDraft!.color ?? "";
-      sizeController.text = widget.variantDraft!.size ?? '';
+      sizeController.text = widget.variantDraft!.variant;
 
       costPriceController.text = widget.variantDraft!.costPrice.toString();
       sellingPriceController.text = widget.variantDraft!.sellingPrice
@@ -151,9 +151,9 @@ class _AddVariantScreenState extends State<AddVariantScreen> {
       color: colorController.text.trim().isEmpty
           ? null
           : colorController.text.trim(),
-      size: sizeController.text.trim().isEmpty
-          ? null
-          : sizeController.text.trim(),
+      variant: 
+          
+          sizeController.text.trim(),
       costPrice: double.parse(costPriceController.text),
       sellingPrice: double.parse(sellingPriceController.text),
       mrp: double.parse(mrpController.text),

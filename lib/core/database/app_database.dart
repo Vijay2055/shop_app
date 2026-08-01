@@ -2,31 +2,44 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shop_app/core/database/tables/app_setings.dart';
 
 import 'package:shop_app/core/database/tables/category_tables.dart';
+import 'package:shop_app/core/database/tables/customer_table.dart';
 import 'package:shop_app/core/database/tables/product_variant_table.dart';
+import 'package:shop_app/core/database/tables/sales_item_table.dart';
+import 'package:shop_app/core/database/tables/sales_table.dart';
 
 import 'tables/product_table.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [Products, Categories, ProductVariants])
+@DriftDatabase(
+  tables: [
+    Products,
+    Categories,
+    ProductVariants,
+    Customers,
+    Sales,
+    SaleItems,
+    AppSettings,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 1;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (Migrator m) async {
-      await m.createAll(); // create all tables
+    onCreate: (m) async {
+      await m.createAll();
     },
-
-    onUpgrade: (Migrator m, int from, int to) async {
-      if (from < 4) {
-        // await m.addColumn(historyTable, historyTable.status);
-      }
+    onUpgrade: (m, from, to) async {
+      // if (from < 5) {
+      //   await m.addColumn(sales, sales.paymentStatus);
+      // }
     },
   );
 }

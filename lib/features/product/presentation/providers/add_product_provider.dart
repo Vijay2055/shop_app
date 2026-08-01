@@ -3,6 +3,6 @@ import 'package:shop_app/features/product/presentation/providers/add_product_not
 import 'package:shop_app/features/product/presentation/state/add_product_state.dart';
 
 final addProductNotifierProvider =
-    AsyncNotifierProvider<AddProductNotifier, AddProductState>(
+    AsyncNotifierProvider.autoDispose<AddProductNotifier, AddProductState>(
   AddProductNotifier.new,
 );

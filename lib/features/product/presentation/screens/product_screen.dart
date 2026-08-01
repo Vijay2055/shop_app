@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shop_app/app/pages.dart';
 import 'package:shop_app/core/widgets/app_data_table/app_paginated_table.dart';
 import 'package:shop_app/core/widgets/app_data_table/app_table_header.dart';
-import 'package:shop_app/features/product/presentation/providers/product_notifier.dart';
+import 'package:shop_app/features/product/presentation/providers/product_provider.dart';
 import 'package:shop_app/features/product/presentation/widgets/product_data_table.dart';
 
 class ProductScreen extends ConsumerWidget {
@@ -27,7 +27,7 @@ class ProductScreen extends ConsumerWidget {
             },
             addButtonText: 'Add Product',
             onAddPressed: () {
-              context.push(Pages.addEditProduct);
+              context.push(Pages.addEditProduct, extra: null);
             },
           ),
 

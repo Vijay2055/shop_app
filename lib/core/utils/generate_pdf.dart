@@ -84,18 +84,18 @@ Future<void> generateThermalBill(List<CartItem> cart, double total) async {
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Text(
-                      item.name,
+                      item.variant.variant,
                       style: pw.TextStyle(font: font, fontSize: 9),
                     ),
                     pw.Row(
                       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                       children: [
                         pw.Text(
-                          "${item.quantity} x ₹${item.price}",
+                          "${item.quantity} x ₹${item.variant.sellingPrice}",
                           style: pw.TextStyle(font: font, fontSize: 8),
                         ),
                         pw.Text(
-                          "₹${(item.price * item.quantity).toStringAsFixed(2)}",
+                          "₹${(item.variant.sellingPrice * item.quantity).toStringAsFixed(2)}",
                           style: pw.TextStyle(font: font, fontSize: 9),
                         ),
                       ],

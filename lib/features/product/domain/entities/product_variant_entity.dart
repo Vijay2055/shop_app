@@ -11,8 +11,8 @@ class ProductVariantEntity {
 
   final String? color;
 
-// later do this as varient instead of size, because size is not always applicable to all products
-  final String? size;
+// later do this as varient instead of variant, because variant is not always applicable to all products
+  final String variant;
 
   final double costPrice;
 
@@ -42,7 +42,7 @@ class ProductVariantEntity {
     required this.sku,
     required this.barcode,
     this.color,
-    this.size,
+    required this.variant,
     required this.costPrice,
     required this.sellingPrice,
     required this.mrp,

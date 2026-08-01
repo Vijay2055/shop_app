@@ -1,150 +1,116 @@
-// import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:shop_app/features/cart/application/cart_state.dart';
-// import 'package:shop_app/features/cart/application/checkCartProfider.dart';
-// import 'package:shop_app/features/cart/domain/entities/cart_item.dart';
-// import 'package:shop_app/features/product/presentation/providers/product_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shop_app/core/utils/result.dart';
+import 'package:shop_app/features/cart/application/cart_state.dart';
+import 'package:shop_app/features/cart/domain/entities/cart_item.dart';
+import 'package:shop_app/features/product/domain/entities/product_variant_entity.dart';
+import 'package:shop_app/features/product/providers/usecase_providers.dart';
 
-// class CartNotifier extends Notifier<CartState> {
-//   late final Ref _ref;
+class CartNotifier extends Notifier<CartState> {
+  @override
+  CartState build() {
+    return const CartState();
+  }
 
-//   @override
-//   CartState build() {
-//     _ref = ref;
-//     return const CartState();
-//   }
+  Future<void> searchByBarcode(String barcode) async {
+    state = state.copyWith(message: null);
+    final existingIndex = state.items.indexWhere(
+      (e) => e.variant.barcode == barcode,
+    );
 
-//   // Future<bool> addToCart(CartItem item) async {
-//   //   final inventory = _ref.read(inventoryServiceProvider);
+    if (existingIndex != -1) {
+      final item = state.items[existingIndex];
+      final newQty = item.quantity + 1;
 
-//   //   final existingIndex = state.items.indexWhere(
-//   //     (e) => e.productId == item.productId,
-//   //   );
+      if (newQty > item.variant.stock) {
+        state = state.copyWith(
+          message:
+              "${item.variant.variant} can't be more than ${item.variant.stock}",
+        );
+        return;
+      }
 
-//   //   final currentQty = existingIndex >= 0
-//   //       ? state.items[existingIndex].quantity
-//   //       : 0;
+      final items = [...state.items];
+      items[existingIndex] = item.copyWith(quantity: newQty);
 
-//   //   final allowed = await inventory.canAddToCart(
-//   //     productBarcode: item.barcode,
-//   //     currentCartQty: currentQty,
-//   //   );
+      state = state.copyWith(items: items, message: null);
+      return;
+    }
 
-//   //   if (!allowed) return false;
+    final result = await ref.read(getProductVariantByBarcodeUsecaseProvider)(
+      barcode,
+    );
 
-//   //   if (existingIndex >= 0) {
-//   //     final updated = [...state.items];
-//   //     updated[existingIndex] = updated[existingIndex].copyWith(
-//   //       quantity: currentQty + 1,
-//   //     );
+    switch (result) {
+      case Success<ProductVariantEntity>(:final data):
+        state = state.copyWith(
+          items: [
+            CartItem(quantity: 1, variant: data),
+            ...state.items,
+          ],
+          message: null,
+        );
 
-//   //     state = state.copyWith(items: updated);
-//   //   } else {
-//   //     state = state.copyWith(items: [item, ...state.items]);
-//   //   }
-//   //   return true;
-//   // }
+      case FailureResult<ProductVariantEntity>(:final failure):
+        state = state.copyWith(message: failure.message);
+    }
+  }
 
-//   void addToCart(CartItem item) {
-//     final productState = _ref.read(productNotifierProvider);
+  void increaseQuantity(String productId) {
+    final index = state.items.indexWhere((e) => e.variant.id == productId);
 
-//     final product = productState.maybeWhen(
-//       data: (products) => products.firstWhere((p) => p.id == item.productId),
-//       orElse: () => null,
-//     );
+    if (index == -1) return;
 
-//     if (product == null) return;
+    final item = state.items[index];
 
-//     final existingIndex = state.items.indexWhere(
-//       (e) => e.productId == item.productId,
-//     );
+    if (item.quantity >= item.variant.stock) {
+      state = state.copyWith(
+        message:
+            "${item.variant.variant} stock limit reached (${item.variant.stock})",
+      );
+      return;
+    }
 
-//     final currentQty = existingIndex >= 0
-//         ? state.items[existingIndex].quantity
-//         : 0;
+    final items = [...state.items];
+    items[index] = item.copyWith(quantity: item.quantity + 1);
 
-//     final newQty = currentQty + 1;
+    state = state.copyWith(items: items, message: null);
+  }
 
-//     // 🚨 STOCK CHECK
-//     if (newQty > product.stock) {
-//       return; // block add
-//     }
+  void decreaseQuantity(String producId) {
+    final index = state.items.indexWhere((e) => e.variant.id == producId);
 
-//     if (existingIndex >= 0) {
-//       final updated = [...state.items];
-//       final existing = updated[existingIndex];
+    if (index == -1) return;
 
-//       updated[existingIndex] = existing.copyWith(quantity: newQty);
+    final item = state.items[index];
 
-//       state = state.copyWith(items: updated);
-//     } else {
-//       state = state.copyWith(items: [item, ...state.items]);
-//     }
-//   }
+    if (item.quantity == 1) {
+      final items = [...state.items]..removeAt(index);
 
-//   void removeItem(String productId) {
-//     state = state.copyWith(
-//       items: state.items.where((e) => e.productId != productId).toList(),
-//     );
-//   }
+      state = state.copyWith(items: items);
+      return;
+    }
 
-//   void increaseQty(String productId) {
-//     final productState = _ref.read(productNotifierProvider);
+    final items = [...state.items];
+    items[index] = item.copyWith(quantity: item.quantity - 1);
 
-//     final product = productState.maybeWhen(
-//       data: (products) => products.firstWhere((p) => p.id == productId),
-//       orElse: () => null,
-//     );
+    state = state.copyWith(items: items);
+  }
 
-//     if (product == null) return;
+  void removeItem(String productId) {
+    state = state.copyWith(
+      items: state.items.where((e) => e.variant.id != productId).toList(),
+    );
+  }
 
-//     state = state.copyWith(
-//       items: state.items.map((e) {
-//         if (e.productId == productId) {
-//           if (e.quantity + 1 > product.stock) {
-//             return e; // block increase
-//           }
-//           return e.copyWith(quantity: e.quantity + 1);
-//         }
-//         return e;
-//       }).toList(),
-//     );
-//   }
+  void clearCart() {
+    state = const CartState();
+  }
 
-//   void decreaseQty(String productId) {
-//     final updated = <CartItem>[];
-//     for (final item in state.items) {
-//       if (productId == item.productId) {
-//         if (item.quantity > 1) {
-//           updated.add(item.copyWith(quantity: item.quantity - 1));
-//         }
-//       } else {
-//         updated.add(item);
-//       }
-//     }
-//     state = state.copyWith(items: updated);
-//   }
+  void clearMessage() {
+    state = state.copyWith(message: null);
+  }
+}
 
-//   void changeStatus(bool newStatus) {
-//     state = state.copyWith(status: newStatus);
-//   }
-
-//   void clearCart() {
-//     state = const CartState();
-//   }
-
-//   // Product? _getProduct(String productId) {
-//   //   final productState = _ref.watch(productNotifierProvider);
-//   //   return productState.when(
-//   //     data: (products) => products.firstWhere(
-//   //       (p) => p.id == productId,
-//   //       orElse: () => throw Exception("Product not found"),
-//   //     ),
-//   //     loading: () => null,
-//   //     error: (_, __) => null,
-//   //   );
-//   // }
-// }
-
-// final cartProvider = NotifierProvider<CartNotifier, CartState>(
-//   CartNotifier.new,
-// );
+final cartProvider = NotifierProvider.autoDispose<CartNotifier, CartState>(
+  CartNotifier.new,
+);

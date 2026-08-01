@@ -91,15 +91,15 @@ class PosReceiptBuilder {
     /// ================= ITEMS =================
 
     for (final item in cart) {
-      final itemTotal = item.price * item.quantity;
+      final itemTotal = item.variant.sellingPrice * item.quantity;
 
       /// ITEM NAME
-      bytes += generator.text(item.name, styles: PosStyles(bold: true));
+      bytes += generator.text(item.variant.variant, styles: PosStyles(bold: true));
 
       /// QTY x PRICE + TOTAL
       bytes += generator.row([
         PosColumn(
-          text: '${item.quantity} x ${item.price.toStringAsFixed(2)}',
+          text: '${item.quantity} x ${item.variant.sellingPrice.toStringAsFixed(2)}',
           width: 6,
         ),
         PosColumn(

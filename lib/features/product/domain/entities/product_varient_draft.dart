@@ -6,7 +6,7 @@ class ProductVariantDraft {
   final String sku;
   final String barcode;
   final String? color;
-  final String? size;
+  final String variant;
   final double costPrice;
   final double sellingPrice;
   final double mrp;
@@ -20,7 +20,7 @@ class ProductVariantDraft {
     required this.sku,
     required this.barcode,
     this.color,
-    this.size,
+    required this.variant,
     this.id,
     required this.costPrice,
     required this.sellingPrice,
@@ -44,7 +44,8 @@ class ProductVariantDraft {
       stock: entity.stock,
       minimumStock: entity.minimumStock,
       isActive: entity.isActive,
-      id: entity.id
+      id: entity.id,
+      variant: entity.variant
     );
   }
 }

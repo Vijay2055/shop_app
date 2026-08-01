@@ -6,6 +6,7 @@ import 'package:shop_app/features/product/domain/usecase/getProductForEdit.dart'
 import 'package:shop_app/features/product/domain/usecase/getProductVariantlist_usecase.dart';
 import 'package:shop_app/features/product/domain/usecase/getProduct_counts.dart';
 import 'package:shop_app/features/product/domain/usecase/get_product_usecase.dart';
+import 'package:shop_app/features/product/domain/usecase/get_product_variant_by_barcode_usecase.dart';
 import 'package:shop_app/features/product/domain/usecase/get_product_variant_count_usecase.dart';
 import 'package:shop_app/features/product/domain/usecase/search_product_variants_usecase.dart';
 import 'package:shop_app/features/product/domain/usecase/search_products_usecase.dart';
@@ -59,4 +60,11 @@ final getProductVariantCountUsecaseProvider =
 final getSearchedProductVariantCountUsecaseProvider =
     Provider<SearchProductVariantsUsecase>((ref) {
       return SearchProductVariantsUsecase(ref.watch(productRepositoryProvider));
+    });
+
+final getProductVariantByBarcodeUsecaseProvider =
+    Provider<GetProductVariantByBarcodeUsecase>((ref) {
+      return GetProductVariantByBarcodeUsecase(
+        ref.watch(productRepositoryProvider),
+      );
     });

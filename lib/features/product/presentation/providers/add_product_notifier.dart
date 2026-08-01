@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shop_app/core/errors/failure.dart';
 import 'package:shop_app/core/utils/result.dart';
 import 'package:shop_app/features/product/domain/entities/product_varient_draft.dart';
-import 'package:shop_app/features/product/presentation/providers/product_notifier.dart';
+import 'package:shop_app/features/product/presentation/providers/product_provider.dart';
 import 'package:shop_app/features/product/presentation/state/add_product_state.dart';
 import 'package:shop_app/features/product/providers/usecase_providers.dart';
 

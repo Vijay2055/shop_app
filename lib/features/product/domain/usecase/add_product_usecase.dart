@@ -38,7 +38,7 @@ class AddProductUseCase {
         sku: draft.sku,
         barcode: draft.barcode,
         color: draft.color,
-        size: draft.size,
+        variant: draft.variant,
         costPrice: draft.costPrice,
         sellingPrice: draft.sellingPrice,
         mrp: draft.mrp,

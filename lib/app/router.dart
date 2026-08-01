@@ -6,8 +6,12 @@ import 'package:shop_app/features/barcode/presentation/screen/barcode_preview_sc
 import 'package:shop_app/features/barcode/presentation/screen/barcode_product_list.dart';
 
 import 'package:shop_app/features/barcode/presentation/screen/pdf_preview_screen.dart';
+import 'package:shop_app/features/billing/presentation/screens/billing_screen.dart';
 
 import 'package:shop_app/features/dashboard/layout/dashboard_layout.dart';
+import 'package:shop_app/features/history/presentation/screens/history_detail.dart';
+
+import 'package:shop_app/features/history/presentation/screens/history_screen.dart';
 import 'package:shop_app/features/homepage/presentation/homepage_screen.dart';
 import 'package:shop_app/features/product/domain/entities/product_entitiy.dart';
 import 'package:shop_app/features/product/domain/entities/product_varient_draft.dart';
@@ -28,19 +32,20 @@ class AppRouter {
             builder: (context, state) => HomepageScreen(),
           ),
 
-          // GoRoute(
-          //   path: Pages.billing,
-          //   builder: (context, state) => BillingScreen(),
-          // ),
-          // GoRoute(
-          //   path: Pages.history,
-          //   builder: (context, state) => HistoryScreen(),
-          // ),
+          GoRoute(
+            path: Pages.billing,
+            builder: (context, state) => BillingScreen(),
+          ),
+          GoRoute(
+            path: Pages.history,
+            builder: (context, state) => HistoryScreen(),
+          ),
 
-          // GoRoute(
-          //   path: Pages.category,
-          //   builder: (context, state) => CategoryScreen(),
-          // ),
+          GoRoute(
+            path: Pages.historyDetail,
+            builder: (context, state) =>
+                SaleDetailScreen(saleId: state.extra as String),
+          ),
           GoRoute(
             path: Pages.product,
             builder: (context, state) => ProductScreen(),

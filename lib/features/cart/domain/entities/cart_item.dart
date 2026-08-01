@@ -1,27 +1,32 @@
+import 'package:shop_app/features/product/domain/entities/product_variant_entity.dart';
+
 class CartItem {
-  final String productId;
-  final String name;
-  final double price;
+  final ProductVariantEntity variant;
   final int quantity;
-  final String barcode;
 
   const CartItem({
-    required this.name,
-    required this.price,
-    required this.productId,
+    required this.variant,
     required this.quantity,
-    required this.barcode,
   });
 
-  double get total => price * quantity;
+  /// MRP × Qty
+  double get mrpTotal => variant.mrp * quantity;
 
-  CartItem copyWith({int? quantity}) {
+  /// Selling Price × Qty
+  double get sellingTotal => variant.sellingPrice * quantity;
+
+  /// Discount for this line
+  double get discount => mrpTotal - sellingTotal;
+
+  /// Alias for selling total
+  double get total => sellingTotal;
+
+  CartItem copyWith({
+    int? quantity,
+  }) {
     return CartItem(
-      name: name,
-      price: price,
-      productId: productId,
       quantity: quantity ?? this.quantity,
-      barcode: barcode,
+      variant: variant,
     );
   }
 }

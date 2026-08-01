@@ -1,288 +1,149 @@
-// import 'package:flutter/material.dart';
-// import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:intl/intl.dart';
-// import 'package:shop_app/features/history/data/models/history_model.dart';
-// import 'package:shop_app/features/history/presentation/provider/history_notifier.dart';
-// import 'package:shop_app/features/history/presentation/screens/history_detail.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shop_app/app/pages.dart';
+import 'package:shop_app/core/widgets/app_data_table/app_paginated_table.dart';
 
-// class HistoryScreen extends ConsumerStatefulWidget {
-//   const HistoryScreen({super.key});
+import 'package:shop_app/core/widgets/app_data_table/app_table_header.dart';
+import 'package:shop_app/features/history/presentation/enum/menu_enum.dart';
+import 'package:shop_app/features/history/presentation/provider/sales_history_notifier.dart';
+import 'package:shop_app/features/history/presentation/widgets/sale_menu_action.dart';
 
-//   @override
-//   ConsumerState<HistoryScreen> createState() => _HistoryScreenState();
-// }
+import 'package:shop_app/features/history/presentation/widgets/sales_table.dart';
+import 'package:shop_app/features/sales/domain/entity/sale_entity.dart';
 
-// class _HistoryScreenState extends ConsumerState<HistoryScreen> {
-//   String searchQuery = "";
-//   final TextEditingController _controller = TextEditingController();
-//   @override
-//   Widget build(BuildContext context) {
-//     final historyAsync = ref.watch(historyProvider);
+class HistoryScreen extends ConsumerWidget {
+  const HistoryScreen({super.key});
 
-//     final currency = NumberFormat.currency(symbol: "Rs ");
-//     final dateFormat = DateFormat("dd MMM yyyy");
+  static const int _pageSize = 20;
 
-//     return historyAsync.when(
-//       loading: () => Container(
-//         color: Colors.grey[100],
-//         child: const Center(child: CircularProgressIndicator()),
-//       ),
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(saleHistoryProvider);
 
-//       error: (error, stackTrace) => Container(
-//         color: Colors.grey[100],
-//         child: Center(
-//           child: Column(
-//             mainAxisSize: MainAxisSize.min,
-//             children: [
-//               const Icon(Icons.error_outline, size: 60, color: Colors.red),
-//               const SizedBox(height: 12),
-//               Text(error.toString(), style: const TextStyle(fontSize: 16)),
-//               const SizedBox(height: 16),
-//               ElevatedButton(
-//                 onPressed: () {
-//                   ref.read(historyProvider.notifier).refreshHistory();
-//                 },
-//                 child: const Text("Retry"),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
+    final totalPages = (state.totalCount / _pageSize).ceil().clamp(1, 999999);
 
-//       data: (provider) {
-//         /// 🔍 FILTER LOGIC
-//         final filteredHistories = provider.histories.where((history) {
-//           final query = searchQuery.toLowerCase();
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          AppTableHeader(
+            title: 'Sales History',
+            subtitle: 'View and manage all sales',
+            searchHint: 'Search invoice or customer...',
+            onSearchChanged: (value) {
+              ref.read(saleHistoryProvider.notifier).search(value);
+            },
+            trailingActions: [
+              SizedBox(
+                width: 180,
+                child: DropdownButtonFormField<PaymentFilter>(
+                  value: state.paymentFilter,
+                  decoration: const InputDecoration(
+                    labelText: "Payment",
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: PaymentFilter.all,
+                      child: Text("All"),
+                    ),
+                    DropdownMenuItem(
+                      value: PaymentFilter.paid,
+                      child: Text("Paid"),
+                    ),
+                    DropdownMenuItem(
+                      value: PaymentFilter.unpaid,
+                      child: Text("Unpaid"),
+                    ),
+                    DropdownMenuItem(
+                      value: PaymentFilter.partial,
+                      child: Text("Partial"),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      ref
+                          .read(saleHistoryProvider.notifier)
+                          .filterByPayment(value);
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
 
-//           final matchId = history.id.toLowerCase().contains(query);
+          //
+          Expanded(
+            child: SalesHistoryTable(
+              sales: state.sales,
+              loading: state.isLoading,
+              error: state.error,
+              onTap: (sale) {
+                context.push(Pages.historyDetail, extra: sale.id);
+              },
+              action: (sale) {
+                return SaleHistoryActionMenu(
+                  isCredit: sale.saleType == SaleType.credit,
+                  hasDue: sale.totalItems > 0,
+                  onSelected: (action) {
+                    switch (action) {
+                      case SaleHistoryAction.view:
+                        // Open details screen
+                        break;
 
-//           // final matchProduct = history.products.any(
-//           //   (p) => p.productName.toLowerCase().contains(query),
-//           // );
+                      case SaleHistoryAction.print:
+                        // Print receipt
+                        break;
 
-//           return matchId;
-//         }).toList();
+                      case SaleHistoryAction.pdf:
+                        // Generate PDF
+                        break;
 
-//         return Container(
-//           color: Colors.grey[100],
-//           padding: const EdgeInsets.all(24),
-//           child: Center(
-//             child: ConstrainedBox(
-//               constraints: const BoxConstraints(maxWidth: 900),
-//               child: Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   const Text(
-//                     "Order History",
-//                     style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-//                   ),
+                      case SaleHistoryAction.receivePayment:
+                        // Open payment dialog
+                        break;
 
-//                   const SizedBox(height: 16),
+                      case SaleHistoryAction.editNote:
+                        // Edit note
+                        break;
 
-//                   /// 🔍 SEARCH FIELD
-//                   TextField(
-//                     controller: _controller,
-//                     onChanged: (value) {
-//                       setState(() => searchQuery = value);
-//                     },
-//                     decoration: InputDecoration(
-//                       hintText: "Search order or product...",
-//                       prefixIcon: const Icon(Icons.search),
+                      case SaleHistoryAction.cancel:
+                        // Cancel confirmation
+                        break;
+                    }
+                  },
+                );
+              },
+         
+         
+         
+            ),
+          ),
 
-//                       suffixIcon: searchQuery.isNotEmpty
-//                           ? IconButton(
-//                               icon: const Icon(Icons.close),
-//                               onPressed: () {
-//                                 _controller.clear();
-//                                 setState(() => searchQuery = "");
-//                               },
-//                             )
-//                           : null,
+          const SizedBox(height: 16),
 
-//                       filled: true,
-//                       fillColor: Colors.white,
-//                       contentPadding: const EdgeInsets.symmetric(vertical: 0),
-
-//                       border: OutlineInputBorder(
-//                         borderRadius: BorderRadius.circular(14),
-//                         borderSide: BorderSide.none,
-//                       ),
-//                     ),
-//                   ),
-
-//                   const SizedBox(height: 20),
-
-//                   /// 📦 LIST / EMPTY STATE
-//                   Expanded(
-//                     child: filteredHistories.isEmpty
-//                         ? _EmptyState()
-//                         : ListView.separated(
-//                             padding: const EdgeInsets.all(20),
-//                             itemCount: filteredHistories.length,
-//                             separatorBuilder: (_, __) =>
-//                                 const SizedBox(height: 14),
-
-//                             itemBuilder: (context, index) {
-//                               final history = filteredHistories[index];
-
-//                               return _HistoryCard(
-//                                 history: history,
-//                                 currency: currency,
-//                                 dateFormat: dateFormat,
-//                                 onTap: () {
-                                 
-//                                   Navigator.of(context).push(
-//                                     MaterialPageRoute(
-//                                       builder: (_) =>
-//                                           HistoryDetail(historyId: history.id),
-//                                     ),
-//                                   );
-//                                 },
-//                               );
-//                             },
-//                           ),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           ),
-//         );
-//       },
-//     );
-//   }
-// }
-
-// /// 🧾 HISTORY CARD (UNCHANGED DESIGN)
-// class _HistoryCard extends StatefulWidget {
-//   final HistoryModel history;
-//   final NumberFormat currency;
-//   final DateFormat dateFormat;
-//   final VoidCallback onTap;
-
-//   const _HistoryCard({
-//     required this.history,
-//     required this.currency,
-//     required this.dateFormat,
-//     required this.onTap,
-//   });
-
-//   @override
-//   State<_HistoryCard> createState() => _HistoryCardState();
-// }
-
-// class _HistoryCardState extends State<_HistoryCard> {
-//   bool isHovered = false;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MouseRegion(
-//       cursor: SystemMouseCursors.click,
-//       onEnter: (_) => setState(() => isHovered = true),
-//       onExit: (_) => setState(() => isHovered = false),
-//       child: GestureDetector(
-//         onTap: widget.onTap,
-//         child: AnimatedContainer(
-//           duration: const Duration(milliseconds: 200),
-//           transform: Matrix4.identity()..scale(isHovered ? 1.01 : 1.0),
-
-//           padding: const EdgeInsets.all(18),
-//           decoration: BoxDecoration(
-//             color: isHovered ? Colors.grey[50] : Colors.white,
-//             borderRadius: BorderRadius.circular(16),
-//             boxShadow: [
-//               BoxShadow(
-//                 blurRadius: isHovered ? 16 : 8,
-//                 color: Colors.black.withOpacity(isHovered ? 0.15 : 0.08),
-//                 offset: const Offset(0, 6),
-//               ),
-//             ],
-//             border: Border.all(
-//               color: isHovered
-//                   ? Colors.blue.withOpacity(0.3)
-//                   : Colors.transparent,
-//             ),
-//           ),
-
-//           child: Row(
-//             children: [
-//               AnimatedContainer(
-//                 duration: const Duration(milliseconds: 200),
-//                 padding: const EdgeInsets.all(12),
-//                 decoration: BoxDecoration(
-//                   color: isHovered
-//                       ? Colors.blue.withOpacity(0.2)
-//                       : Colors.blue.withOpacity(0.1),
-//                   shape: BoxShape.circle,
-//                 ),
-//                 child: const Icon(Icons.receipt_long, color: Colors.blue),
-//               ),
-
-//               const SizedBox(width: 16),
-
-//               Expanded(
-//                 child: Column(
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   children: [
-//                     Text(
-//                       "Order #${widget.history.id}",
-//                       style: const TextStyle(
-//                         fontWeight: FontWeight.bold,
-//                         fontSize: 16,
-//                       ),
-//                     ),
-//                     const SizedBox(height: 6),
-//                     Text(
-//                       "${widget.dateFormat.format(widget.history.date)} • items",
-//                       style: TextStyle(color: Colors.grey[600]),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-
-//               Column(
-//                 crossAxisAlignment: CrossAxisAlignment.end,
-//                 children: [
-//                   Text(
-//                     widget.currency.format(widget.history.total),
-//                     style: const TextStyle(
-//                       fontWeight: FontWeight.bold,
-//                       fontSize: 16,
-//                       color: Colors.green,
-//                     ),
-//                   ),
-//                   const SizedBox(height: 6),
-//                   AnimatedContainer(
-//                     duration: const Duration(milliseconds: 200),
-//                     transform: Matrix4.translationValues(
-//                       isHovered ? 4 : 0,
-//                       0,
-//                       0,
-//                     ),
-//                     child: const Icon(
-//                       Icons.arrow_forward_ios,
-//                       size: 16,
-//                       color: Colors.grey,
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-// /// ❌ EMPTY STATE
-// class _EmptyState extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Center(
-//       child: Text(
-//         "No matching orders found",
-//         style: TextStyle(color: Colors.grey[600]),
-//       ),
-//     );
-//   }
-// }
+          AppTablePagination(
+            currentPage: state.page,
+            totalPages: totalPages,
+            onPrevious: state.page > 1
+                ? () {
+                    ref
+                        .read(saleHistoryProvider.notifier)
+                        .loadPage(state.page - 1);
+                  }
+                : null,
+            onNext: state.page < totalPages
+                ? () {
+                    ref
+                        .read(saleHistoryProvider.notifier)
+                        .loadPage(state.page + 1);
+                  }
+                : null,
+          ),
+        ],
+      ),
+    );
+  }
+}
