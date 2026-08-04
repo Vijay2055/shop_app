@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shop_app/core/utils/result.dart';
+import 'package:shop_app/features/billing/application/message_notifier.dart';
 import 'package:shop_app/features/cart/application/cart_state.dart';
 import 'package:shop_app/features/cart/domain/entities/cart_item.dart';
 import 'package:shop_app/features/product/domain/entities/product_variant_entity.dart';
@@ -26,6 +27,13 @@ class CartNotifier extends Notifier<CartState> {
           message:
               "${item.variant.variant} can't be more than ${item.variant.stock}",
         );
+
+        ref
+            .read(messageProvider.notifier)
+            .showError(
+              "${item.variant.variant} stock limit reached (${item.variant.stock})",
+            );
+
         return;
       }
 
@@ -49,9 +57,12 @@ class CartNotifier extends Notifier<CartState> {
           ],
           message: null,
         );
+        break;
 
       case FailureResult<ProductVariantEntity>(:final failure):
         state = state.copyWith(message: failure.message);
+        ref.read(messageProvider.notifier).showError(failure.message);
+        break;
     }
   }
 
@@ -67,6 +78,11 @@ class CartNotifier extends Notifier<CartState> {
         message:
             "${item.variant.variant} stock limit reached (${item.variant.stock})",
       );
+      ref
+          .read(messageProvider.notifier)
+          .showError(
+            "${item.variant.variant} stock limit reached (${item.variant.stock})",
+          );
       return;
     }
 

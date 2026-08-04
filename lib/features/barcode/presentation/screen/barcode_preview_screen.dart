@@ -161,7 +161,7 @@ class BarcodePreviewScreen extends ConsumerWidget {
                         const SizedBox(width: 8),
 
                         ChoiceChip(
-                          label: const Text("A4-48"),
+                          label: const Text("A4-80"),
                           selected: state.layout == BarcodeLayout.a4_80,
                           onSelected: (_) {
                             notifier.changeLayout(BarcodeLayout.a4_80);

@@ -1,11 +1,12 @@
-
-
 import 'package:shop_app/features/homepage/domain/entity/top_selling_entity.dart';
 
 class DashboardSummaryEntity {
   final double totalSales;
   final double totalProfit;
   final double totalDue;
+  final double totalCostPrice;
+  final double totalVatCp;
+  final double totalPurchaseAmt;
 
   final int totalItemsSold;
   final int totalInvoices;
@@ -28,5 +29,8 @@ class DashboardSummaryEntity {
     required this.totalVariants,
     required this.lowStockProducts,
     required this.topSellingProducts,
+    required this.totalCostPrice,
+    required this.totalPurchaseAmt,
+    required this.totalVatCp
   });
 }

@@ -1,6 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shop_app/core/services/printer/models/print_job.dart';
+import 'package:shop_app/core/services/printer/pos_receipt_builder.dart';
+import 'package:shop_app/core/services/printer/providers/print_provider.dart';
 import 'package:shop_app/core/utils/result.dart';
 import 'package:shop_app/features/billing/application/billing_sate.dart';
+import 'package:shop_app/features/billing/application/message_notifier.dart';
 import 'package:shop_app/features/cart/application/cart_notifier.dart';
 import 'package:shop_app/features/customer/domain/entity/customer_entity.dart';
 import 'package:shop_app/features/sales/data/providers/sales_provider.dart';
@@ -18,7 +22,7 @@ class BillingNotifier extends Notifier<BillingState> {
   Future<void> generateBill(double receivedAmount) async {
     state = state.copyWith(
       isLoading: true,
-      loadingMessage: "Saving bill...",
+
       successMessage: null,
       errorMessage: null,
     );
@@ -39,24 +43,31 @@ class BillingNotifier extends Notifier<BillingState> {
         //----------------------------------
         state = state.copyWith(loadingMessage: "Generating receipt...");
 
-        //         final status = await ref.read(printerServiceProvider)
-        //     .getPrinterStatus(defaultPrinter);
+        //   /// BUILD RECEIPT
+        final builder = ref.read(posReceiptBuilderProvider);
 
-        // if (status != PrinterStatus.ready) {
-        //   state = state.copyWith(
-        //     message: "Printer is not ready.",
-        //   );
-
-        // final pdfBytes = await ref.read(pdfServiceProvider)
-        //     .generateSalePdf(data.id);
+        final bytes = await builder.buildReceipt(
+          billNumber: data.invoiceNumber,
+          cart: cart.items,
+          total: cart.totalAmount,
+        );
 
         //----------------------------------
-        // Print
+        // Queue Print
         //----------------------------------
-        state = state.copyWith(loadingMessage: "Printing...");
 
-        // await ref.read(printerServiceProvider)
-        //     .print(pdfBytes);
+        ref.read(messageProvider.notifier).showSuccess("Printing...");
+
+        state = state.copyWith(
+          loadingMessage: "Printing...",
+          successMessage: null,
+          errorMessage: null,
+        );
+        ref
+            .read(printQueueProvider)
+            .addJob(PrintJob(billId: data.invoiceNumber, bytes: bytes));
+
+        await Future.delayed(const Duration(seconds: 2));
 
         //----------------------------------
         // Success
@@ -70,17 +81,31 @@ class BillingNotifier extends Notifier<BillingState> {
           errorMessage: null,
         );
 
+        ref
+            .read(messageProvider.notifier)
+            .showSuccess("Bill generated successfully.");
+
+        break;
+
       case FailureResult(:final failure):
         state = state.copyWith(
           isLoading: false,
           loadingMessage: null,
           errorMessage: failure.message,
         );
+
+        ref.read(messageProvider.notifier).showError("Product not found.");
+
+        break;
     }
   }
 
   void clearMessages() {
-    state = state.copyWith(successMessage: null, errorMessage: null);
+    state = state.copyWith(
+      loadingMessage: null,
+      successMessage: null,
+      errorMessage: null,
+    );
   }
 
   void setCustomer(CustomerEntity customer) {

@@ -21,6 +21,23 @@ class BarcodePdfService {
 
     final config = getLayoutConfig(layout);
 
+    const pageWidth = 210.0;
+    const pageHeight = 297.0;
+
+    final labelWidth =
+        config.widthMm ??
+        ((pageWidth -
+                (config.leftMarginMm * 2) -
+                ((config.columns - 1) * config.horizontalGapMm)) /
+            config.columns);
+
+    final labelHeight =
+        config.heightMm ??
+        ((pageHeight -
+                (config.topMarginMm * 2) -
+                ((config.rows - 1) * config.verticalGapMm)) /
+            config.rows);
+
     final labels = <BarcodeItem>[];
 
     for (final item in items) {
@@ -48,23 +65,41 @@ class BarcodePdfService {
                 final row = index ~/ config.columns;
                 final col = index % config.columns;
 
+                // final left =
+                //     (config.leftMarginMm +
+                //         col * (config.widthMm + config.horizontalGapMm)) *
+                //     PdfPageFormat.mm;
+
                 final left =
                     (config.leftMarginMm +
-                        col * (config.widthMm + config.horizontalGapMm)) *
+                        col * (labelWidth + config.horizontalGapMm)) *
                     PdfPageFormat.mm;
+
+                // final top =
+                //     (config.topMarginMm +
+                //         row * (config.heightMm + config.verticalGapMm)) *
+                //     PdfPageFormat.mm;
 
                 final top =
                     (config.topMarginMm +
-                        row * (config.heightMm + config.verticalGapMm)) *
+                        row * (labelHeight + config.verticalGapMm)) *
                     PdfPageFormat.mm;
 
                 return pw.Positioned(
                   left: left,
                   top: top,
                   child: pw.Container(
-                    width: config.widthMm * PdfPageFormat.mm,
-                    height: config.heightMm * PdfPageFormat.mm,
-                    child: _buildLabel(pageLabels[index], font, config),
+                    // width: config.widthMm * PdfPageFormat.mm,
+                    // height: config.heightMm * PdfPageFormat.mm,
+                    // child: _buildLabel(pageLabels[index], font, config),
+                    width: labelWidth * PdfPageFormat.mm,
+                    height: labelHeight * PdfPageFormat.mm,
+                    child: _buildLabel(
+                      pageLabels[index],
+                      font,
+                      labelWidth,
+                      labelHeight,
+                    ),
                   ),
                 );
               }),
@@ -95,8 +130,41 @@ class BarcodePdfService {
 pw.Widget _buildLabel(
   BarcodeItem item,
   pw.Font font,
-  BarcodeLayoutConfig config,
+  double labelWidth,
+  double labelHeight,
 ) {
+  final isSmallLabel = labelHeight <= 20; // A4-80
+
+  if (isSmallLabel) {
+    return pw.Container(
+      alignment: pw.Alignment.center,
+      padding: const pw.EdgeInsets.all(1),
+      child: pw.Column(
+        mainAxisAlignment: pw.MainAxisAlignment.center,
+        children: [
+          pw.Text(
+            "Rs ${item.product.sellingPrice.toStringAsFixed(0)}",
+            style: pw.TextStyle(
+              font: font,
+              fontSize: 5,
+              fontWeight: pw.FontWeight.bold,
+            ),
+          ),
+
+          pw.SizedBox(height: 1),
+
+          pw.BarcodeWidget(
+            barcode: pw.Barcode.code128(),
+            data: item.product.barcode,
+            width: labelWidth * PdfPageFormat.mm * 0.95,
+            height: labelHeight * PdfPageFormat.mm * 0.55,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Normal labels
   return pw.Container(
     alignment: pw.Alignment.center,
     padding: const pw.EdgeInsets.all(2),
@@ -104,9 +172,20 @@ pw.Widget _buildLabel(
       mainAxisAlignment: pw.MainAxisAlignment.center,
       children: [
         pw.Text(
-          item.product.sku,
+          item.product.variant,
           textAlign: pw.TextAlign.center,
-          maxLines: 1,
+          maxLines: 2,
+          style: pw.TextStyle(
+            font: font,
+            fontSize: 8,
+            fontWeight: pw.FontWeight.bold,
+          ),
+        ),
+
+        pw.SizedBox(height: 2),
+
+        pw.Text(
+          "Rs ${item.product.sellingPrice.toStringAsFixed(2)}",
           style: pw.TextStyle(
             font: font,
             fontSize: 8,
@@ -119,21 +198,107 @@ pw.Widget _buildLabel(
         pw.BarcodeWidget(
           barcode: pw.Barcode.code128(),
           data: item.product.barcode,
-          width: config.widthMm * PdfPageFormat.mm * .80,
-          height: config.heightMm * PdfPageFormat.mm * .38,
-        ),
-
-        pw.SizedBox(height: 2),
-
-        pw.Text(
-          item.product.barcode,
-          textAlign: pw.TextAlign.center,
-          style: pw.TextStyle(font: font, fontSize: 7),
+          width: labelWidth * PdfPageFormat.mm * 0.80,
+          height: labelHeight * PdfPageFormat.mm * 0.40,
         ),
       ],
     ),
   );
 }
+
+// pw.Widget _buildLabel(
+//   BarcodeItem item,
+//   pw.Font font,
+//   double labelWidth,
+//   double labelHeight,
+// ) {
+//   return pw.Container(
+//     alignment: pw.Alignment.center,
+//     padding: const pw.EdgeInsets.all(2),
+//     child: pw.Column(
+//       mainAxisAlignment: pw.MainAxisAlignment.center,
+//       children: [
+//         // Product Name
+//         pw.Text(
+//           item.product.variant,
+//           textAlign: pw.TextAlign.center,
+//           maxLines: 2,
+//           style: pw.TextStyle(
+//             font: font,
+//             fontSize: 8,
+//             fontWeight: pw.FontWeight.bold,
+//           ),
+//         ),
+
+//         pw.SizedBox(height: 2),
+
+//         // Price
+//         pw.Text(
+//           "Rs ${item.product.sellingPrice.toStringAsFixed(2)}",
+//           style: pw.TextStyle(
+//             font: font,
+//             fontSize: 8,
+//             fontWeight: pw.FontWeight.bold,
+//           ),
+//         ),
+
+//         pw.SizedBox(height: 3),
+
+//         // Barcode (only one)
+//         pw.BarcodeWidget(
+//           barcode: pw.Barcode.code128(),
+//           data: item.product.barcode,
+//           width: labelWidth * PdfPageFormat.mm * .80,
+//           height: labelHeight * PdfPageFormat.mm * .40,
+//         ),
+//       ],
+//     ),
+//   );
+// }
+
+// pw.Widget _buildLabel(
+//   BarcodeItem item,
+//   pw.Font font,
+//   double labelWidth,
+//   double labelHeight,
+// ) {
+//   return pw.Container(
+//     alignment: pw.Alignment.center,
+//     padding: const pw.EdgeInsets.all(2),
+//     child: pw.Column(
+//       mainAxisAlignment: pw.MainAxisAlignment.center,
+//       children: [
+//         pw.Text(
+//           item.product.sku,
+//           textAlign: pw.TextAlign.center,
+//           maxLines: 1,
+//           style: pw.TextStyle(
+//             font: font,
+//             fontSize: 8,
+//             fontWeight: pw.FontWeight.bold,
+//           ),
+//         ),
+
+//         pw.SizedBox(height: 2),
+
+//         pw.BarcodeWidget(
+//           barcode: pw.Barcode.code128(),
+//           data: item.product.barcode,
+//           width: labelWidth * PdfPageFormat.mm * .80,
+//           height: labelHeight * PdfPageFormat.mm * .38,
+//         ),
+
+//         pw.SizedBox(height: 2),
+
+//         pw.Text(
+//           item.product.barcode,
+//           textAlign: pw.TextAlign.center,
+//           style: pw.TextStyle(font: font, fontSize: 7),
+//         ),
+//       ],
+//     ),
+//   );
+// }
 
 final pdfServiceProvider = Provider<BarcodePdfService>(
   (ref) => BarcodePdfService(),

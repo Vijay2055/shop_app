@@ -49,12 +49,6 @@ class Sidebar extends StatelessWidget {
             route: Pages.history,
             currentLocation: currentLocation,
           ),
-          _buildItem(
-            context,
-            title: "Udhary Khata",
-            route: Pages.udharyKhata,
-            currentLocation: currentLocation,
-          ),
 
           _buildItem(
             context,

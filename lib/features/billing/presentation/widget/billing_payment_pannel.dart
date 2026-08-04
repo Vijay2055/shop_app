@@ -3,6 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shop_app/app/pages.dart';
+import 'package:shop_app/core/services/printer/receipt_pdf_builder.dart';
 import 'package:shop_app/features/billing/application/billing_notifier.dart';
 import 'package:shop_app/features/cart/application/cart_notifier.dart';
 import 'package:shop_app/features/customer/domain/entity/customer_entity.dart';
@@ -18,54 +21,15 @@ class BillingPaymentPannel extends ConsumerWidget {
   ) async {
     ref.read(billingProvider.notifier).generateBill(receivedAmount);
 
-    // try {
-    //   final selectedUdhar = ref.read(selectedUdharProvider);
-    //   if (cartState.items.isEmpty) {
-    //     ScaffoldMessenger.of(
-    //       context,
-    //     ).showSnackBar(const SnackBar(content: Text("Cart is empty")));
-    //     return;
-    //   }
+    // final cart = ref.read(cartProvider);
 
-    //   /// CREATE BILL
-    //   final bill = await ref
-    //       .read(historyProvider.notifier)
-    //       .createBill(
-    //         items: cartState.items,
-    //         total: cartState.totalAmount,
-    //         udharId: selectedUdhar,
-    //         status: selectedUdhar == null ? "completed" : "pending",
-    //       );
-
-    //   /// BUILD RECEIPT
-    //   final builder = PosReceiptBuilder();
-
-    //   final bytes = await builder.buildReceipt(
-    //     billNumber: bill,
-    //     cart: cartState.items,
-    //     total: cartState.totalAmount,
-    //   );
-
-    //   /// ADD TO PRINT QUEUE
-    //   ref.read(printQueueProvider).addJob(PrintJob(billId: bill, bytes: bytes));
-
-    //   /// CLEAR STATE
-    //   ref.read(cartProvider.notifier).clearCart();
-
-    //   ref.read(selectedUdharProvider.notifier).clear();
-
-    //   if (context.mounted) {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       const SnackBar(content: Text("Receipt added to print queue")),
+    // final pdfBytes = await ref
+    //     .read(receiptPdfBuilderProvider)
+    //     .buildReceipt(
+    //       billNumber: "INV0001", // or your invoice number
+    //       cart: cart.items,
+    //       total: cart.totalAmount,
     //     );
-    //   }
-    // } catch (e) {
-    //   if (context.mounted) {
-    //     ScaffoldMessenger.of(
-    //       context,
-    //     ).showSnackBar(SnackBar(content: Text("Error: $e")));
-    //   }
-    // }
   }
 
   @override

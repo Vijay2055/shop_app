@@ -100,6 +100,6 @@ class ProductVariantListNotifier extends Notifier<ProductListBarcodeState> {
 }
 
 final productVariantListNotifierProvider =
-    NotifierProvider<ProductVariantListNotifier, ProductListBarcodeState>(
+    NotifierProvider.autoDispose<ProductVariantListNotifier, ProductListBarcodeState>(
       ProductVariantListNotifier.new,
     );

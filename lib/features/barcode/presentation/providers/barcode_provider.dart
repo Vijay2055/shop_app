@@ -6,7 +6,7 @@ import 'package:shop_app/features/barcode/presentation/view_states/barcode_state
 import 'package:shop_app/features/barcode/providers/barcode_generatepdfusecase_provider.dart';
 import 'package:shop_app/features/product/domain/entities/product_variant_entity.dart';
 
-final barcodeProvider = NotifierProvider<BarcodeNotifier, BarcodeState>(
+final barcodeProvider = NotifierProvider.autoDispose<BarcodeNotifier, BarcodeState>(
   BarcodeNotifier.new,
 );
 

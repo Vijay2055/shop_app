@@ -1,307 +1,391 @@
-// import 'package:drift/drift.dart';
-// import 'package:intl/intl.dart';
-// import 'package:shop_app/core/database/app_database.dart';
-// import 'package:shop_app/features/homepage/data/dto/sales_graph_dto.dart';
-// import 'package:shop_app/features/homepage/data/dto/sales_graph_response_dto.dart';
-// import 'package:shop_app/features/homepage/data/dto/sales_summary_dto.dart';
-// import 'package:shop_app/features/homepage/data/dto/topSellingDto.dart';
-// import 'package:shop_app/features/homepage/data/enum/graph_range.dart';
+import 'package:drift/drift.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shop_app/core/database/app_database.dart';
+import 'package:shop_app/core/database/providers/app_database_provider.dart';
+import 'package:shop_app/features/homepage/data/dto/revenue_point_dto.dart';
+import 'package:shop_app/features/homepage/data/dto/sales_summary_dto.dart';
+import 'package:shop_app/features/homepage/data/dto/topSellingDto.dart';
 
-// abstract interface class DashboardLocalDataSource {
-//   /// Dashboard cards + Top 5 selling products
-//   Future<DashboardSummaryDto> getDashboardSummary();
+abstract interface class DashboardLocalDataSource {
+  /// Dashboard cards + Top 5 selling products
+  Future<DashboardSummaryDto> getDashboardSummary();
+  Future<List<RevenuePointDto>> getRevenueGraph({
+  int days = 7,
+});
 
-//   /// Sales graph
-//   Future<SalesGraphResponseDto> getSalesGraph({required GraphRange range});
-// }
+  /// Sales graph
+  //   Future<SalesGraphResponseDto> getSalesGraph({required GraphRange range});
+}
 
-// class DashboardLocalDataSourceImpl implements DashboardLocalDataSource {
-//   final AppDatabase db;
+class DashboardLocalDataSourceImpl implements DashboardLocalDataSource {
+  final AppDatabase db;
 
-//   const DashboardLocalDataSourceImpl(this.db);
+  const DashboardLocalDataSourceImpl(this.db);
 
-//   @override
-//   Future<DashboardSummaryDto> getDashboardSummary() async {
-//     //---------------------------------------------------------
-//     // Total Sales
-//     //---------------------------------------------------------
-//     final totalSalesExp = db.sales.grandTotal.sum();
+  @override
+  Future<DashboardSummaryDto> getDashboardSummary() async {
+    //---------------------------------------------------------
+    // Total Sales
+    //---------------------------------------------------------
+    final totalSalesExp = db.sales.grandTotal.sum();
 
-//     final totalSalesRow = await (db.selectOnly(
-//       db.sales,
-//     )..addColumns([totalSalesExp])).getSingle();
+    final totalSalesRow = await (db.selectOnly(
+      db.sales,
+    )..addColumns([totalSalesExp])).getSingle();
 
-//     final totalSales = totalSalesRow.read(totalSalesExp) ?? 0;
+    final totalSales = totalSalesRow.read(totalSalesExp) ?? 0;
 
-//     //---------------------------------------------------------
-//     // Total Due
-//     //---------------------------------------------------------
-//     final totalDueExp = db.sales.dueAmount.sum();
+    //---------------------------------------------------------
+    // Total Due
+    //---------------------------------------------------------
+    final totalDueExp = db.sales.dueAmount.sum();
 
-//     final totalDueRow = await (db.selectOnly(
-//       db.sales,
-//     )..addColumns([totalDueExp])).getSingle();
+    final totalDueRow = await (db.selectOnly(
+      db.sales,
+    )..addColumns([totalDueExp])).getSingle();
 
-//     final totalDue = totalDueRow.read(totalDueExp) ?? 0;
+    final totalDue = totalDueRow.read(totalDueExp) ?? 0;
 
-//     //---------------------------------------------------------
-//     // Total Items Sold
-//     //---------------------------------------------------------
-//     final totalItemsExp = db.saleItems.quantity.sum();
+    //---------------------------------------------------------
+    // Total Items Sold
+    //---------------------------------------------------------
+    final totalItemsExp = db.saleItems.quantity.sum();
 
-//     final totalItemsRow = await (db.selectOnly(
-//       db.saleItems,
-//     )..addColumns([totalItemsExp])).getSingle();
+    final totalItemsRow = await (db.selectOnly(
+      db.saleItems,
+    )..addColumns([totalItemsExp])).getSingle();
 
-//     final totalItemsSold = totalItemsRow.read(totalItemsExp) ?? 0;
+    final totalItemsSold = totalItemsRow.read(totalItemsExp) ?? 0;
 
-//     //---------------------------------------------------------
-//     // Total Profit
-//     //---------------------------------------------------------
-//     final saleItems = await db.select(db.saleItems).get();
+    //---------------------------------------------------------
+    // Total Profit
+    //---------------------------------------------------------
+    final saleItems = await db.select(db.saleItems).get();
 
-//     double totalProfit = 0;
+    double totalProfit = 0;
+    double totalCost = 0;
+    double totalVatAmount = 0;
+    double totalPurchaseAmt = 0;
 
-//     for (final item in saleItems) {
-//       totalProfit += (item.sellingPrice - item.costPrice) * item.quantity;
-//     }
+    for (final item in saleItems) {
+      final purchaseCost =
+          item.costPrice + (item.costPrice * item.vatPercent / 100);
 
-//     //---------------------------------------------------------
-//     // Total Invoices
-//     //---------------------------------------------------------
-//     final invoiceCountExp = db.sales.id.count();
+      totalProfit += (item.sellingPrice - purchaseCost) * item.quantity;
 
-//     final invoiceRow = await (db.selectOnly(
-//       db.sales,
-//     )..addColumns([invoiceCountExp])).getSingle();
+      totalCost += item.costPrice * item.quantity;
 
-//     final totalInvoices = invoiceRow.read(invoiceCountExp) ?? 0;
+      totalVatAmount +=
+          (item.costPrice * item.quantity * item.vatPercent) / 100;
 
-//     //---------------------------------------------------------
-//     // Total Customers
-//     //---------------------------------------------------------
-//     final customerCountExp = db.customers.id.count();
+      totalPurchaseAmt += purchaseCost * item.quantity;
 
-//     final customerRow = await (db.selectOnly(
-//       db.customers,
-//     )..addColumns([customerCountExp])).getSingle();
+      // note this will be real product
+      //   totalVatAmount +=
+      //       (item.sellingPrice * item.quantity * item.vatPercent) / 100;
+    }
 
-//     final totalCustomers = customerRow.read(customerCountExp) ?? 0;
+    //---------------------------------------------------------
+    // Total Invoices
+    //---------------------------------------------------------
+    final invoiceCountExp = db.sales.id.count();
 
-//     //---------------------------------------------------------
-//     // Total Products
-//     //---------------------------------------------------------
-//     final productCountExp = db.products.id.count();
+    final invoiceRow = await (db.selectOnly(
+      db.sales,
+    )..addColumns([invoiceCountExp])).getSingle();
 
-//     final productRow = await (db.selectOnly(
-//       db.products,
-//     )..addColumns([productCountExp])).getSingle();
+    final totalInvoices = invoiceRow.read(invoiceCountExp) ?? 0;
 
-//     final totalProducts = productRow.read(productCountExp) ?? 0;
+    //---------------------------------------------------------
+    // Total Customers
+    //---------------------------------------------------------
+    final customerCountExp = db.customers.id.count();
 
-//     //---------------------------------------------------------
-//     // Total Variants
-//     //---------------------------------------------------------
-//     final variantCountExp = db.productVariants.id.count();
+    final customerRow = await (db.selectOnly(
+      db.customers,
+    )..addColumns([customerCountExp])).getSingle();
 
-//     final variantRow = await (db.selectOnly(
-//       db.productVariants,
-//     )..addColumns([variantCountExp])).getSingle();
+    final totalCustomers = customerRow.read(customerCountExp) ?? 0;
 
-//     final totalVariants = variantRow.read(variantCountExp) ?? 0;
+    //---------------------------------------------------------
+    // Total Products
+    //---------------------------------------------------------
+    final productCountExp = db.products.id.count();
 
-//     //---------------------------------------------------------
-//     // Low Stock Products
-//     //---------------------------------------------------------
-//     final lowStockProducts = await (db.select(
-//       db.productVariants,
-//     )..where((tbl) => tbl.stock.isSmallerThan(tbl.minimumStock))).get();
-//     //---------------------------------------------------------
-//     // Top 5 Selling Products
-//     //---------------------------------------------------------
-//     final qtyExp = db.saleItems.quantity.sum();
+    final productRow = await (db.selectOnly(
+      db.products,
+    )..addColumns([productCountExp])).getSingle();
 
-//     final revenueExp = db.saleItems.lineTotal.sum();
+    final totalProducts = productRow.read(productCountExp) ?? 0;
 
-//     final topSellingRows =
-//         await (db.selectOnly(db.saleItems)
-//               ..addColumns([
-//                 db.saleItems.variantId,
-//                 db.saleItems.productName,
-//                 db.saleItems.variant,
-//                 qtyExp,
-//                 revenueExp,
-//               ])
-//               ..groupBy([
-//                 db.saleItems.variantId,
-//                 db.saleItems.productName,
-//                 db.saleItems.variant,
-//               ])
-//               ..orderBy([OrderingTerm.desc(qtyExp)])
-//               ..limit(5))
-//             .get();
+    //---------------------------------------------------------
+    // Total Variants
+    //---------------------------------------------------------
+    final variantCountExp = db.productVariants.id.count();
 
-//     //---------------------------------------------------------
-//     // Map Top Selling Products
-//     //---------------------------------------------------------
-//     final topSellingProducts = topSellingRows.map((row) {
-//       final quantitySold = row.read(qtyExp) ?? 0;
-//       final revenue = row.read(revenueExp) ?? 0.0;
+    final variantRow = await (db.selectOnly(
+      db.productVariants,
+    )..addColumns([variantCountExp])).getSingle();
 
-//       // Profit = (Selling Price - Cost Price) × Quantity
-//       // Since cost price is stored per sale item, calculate it separately.
-//       final matchingItems = saleItems.where(
-//         (e) => e.variantId == row.read(db.saleItems.variantId)!,
-//       );
+    final totalVariants = variantRow.read(variantCountExp) ?? 0;
 
-//       double profit = 0;
+    //---------------------------------------------------------
+    // Low Stock Products
+    //---------------------------------------------------------
+    final lowStockProducts = await (db.select(
+      db.productVariants,
+    )..where((tbl) => tbl.stock.isSmallerThan(tbl.minimumStock))).get();
+    //---------------------------------------------------------
+    // Top 5 Selling Products
+    //---------------------------------------------------------
+    final qtyExp = db.saleItems.quantity.sum();
 
-//       for (final item in matchingItems) {
-//         profit += (item.sellingPrice - item.costPrice) * item.quantity;
-//       }
+    final revenueExp = db.saleItems.lineTotal.sum();
 
-//       return TopSellingDto(
-//         variantId: row.read(db.saleItems.variantId)!,
-//         productName: row.read(db.saleItems.productName)!,
-//         sku: row.read(db.saleItems.variant)!,
-//         quantitySold: quantitySold,
-//         revenue: revenue,
-//         profit: profit,
-//       );
-//     }).toList();
+    final topSellingRows =
+        await (db.selectOnly(db.saleItems)
+              ..addColumns([
+                db.saleItems.variantId,
+                db.saleItems.productName,
+                db.saleItems.variant,
+                qtyExp,
+                revenueExp,
+              ])
+              ..groupBy([
+                db.saleItems.variantId,
+                db.saleItems.productName,
+                db.saleItems.variant,
+              ])
+              ..orderBy([OrderingTerm.desc(qtyExp)])
+              ..limit(5))
+            .get();
 
-//     //---------------------------------------------------------
-//     // Return Dashboard Summary
-//     //---------------------------------------------------------
-//     return DashboardSummaryDto(
-//       totalSales: totalSales,
-//       totalProfit: totalProfit,
-//       totalDue: totalDue,
-//       totalItemsSold: totalItemsSold,
-//       totalInvoices: totalInvoices,
-//       totalCustomers: totalCustomers,
-//       totalProducts: totalProducts,
-//       totalVariants: totalVariants,
-//       lowStockProducts: lowStockProducts.length,
-//       topSellingProducts: topSellingProducts,
-//     );
-//   }
+    //---------------------------------------------------------
+    // Map Top Selling Products
+    //---------------------------------------------------------
+    final topSellingProducts = topSellingRows.map((row) {
+      final quantitySold = row.read(qtyExp) ?? 0;
+      final revenue = row.read(revenueExp) ?? 0.0;
 
-//  @override
-// Future<SalesGraphResponseDto> getSalesGraph({
-//   required GraphRange range,
-// }) async {
-//   final now = DateTime.now();
+      // Profit = (Selling Price - Cost Price) × Quantity
+      // Since cost price is stored per sale item, calculate it separately.
+      final matchingItems = saleItems.where(
+        (e) => e.variantId == row.read(db.saleItems.variantId)!,
+      );
 
-//   late DateTime startDate;
-//   late List<String> labels;
+      double profit = 0;
 
-//   switch (range) {
-//     //------------------------------------------------------
-//     // Last 7 Days
-//     //------------------------------------------------------
-//     case GraphRange.week:
-//       startDate = now.subtract(const Duration(days: 6));
+      for (final item in matchingItems) {
+        profit += (item.sellingPrice - item.costPrice) * item.quantity;
+      }
 
-//       labels = List.generate(
-//         7,
-//         (i) => DateFormat(
-//           'EEE',
-//         ).format(startDate.add(Duration(days: i))),
-//       );
+      return TopSellingDto(
+        variantId: row.read(db.saleItems.variantId)!,
+        productName: row.read(db.saleItems.productName)!,
+        sku: row.read(db.saleItems.variant)!,
+        quantitySold: quantitySold,
+        revenue: revenue,
+        profit: profit,
+      );
+    }).toList();
 
-//       break;
+    //---------------------------------------------------------
+    // Return Dashboard Summary
+    //---------------------------------------------------------
+    return DashboardSummaryDto(
+      totalSales: totalSales,
+      totalProfit: totalProfit,
+      totalDue: totalDue,
+      totalItemsSold: totalItemsSold,
+      totalInvoices: totalInvoices,
+      totalCustomers: totalCustomers,
+      totalProducts: totalProducts,
+      totalVariants: totalVariants,
+      lowStockProducts: lowStockProducts.length,
+      topSellingProducts: topSellingProducts,
+      totalCostPrice: totalCost,
+      totalPurchaseAmt: totalPurchaseAmt,
+      totalVatCp: totalVatAmount,
+    );
+  }
+  
+@override
+Future<List<RevenuePointDto>> getRevenueGraph({
+  int days = 7,
+}) async {
+  final now = DateTime.now();
 
-//     //------------------------------------------------------
-//     // Current Month
-//     //------------------------------------------------------
-//     case GraphRange.month:
-//       startDate = DateTime(now.year, now.month, 1);
+  final startDate = DateTime(
+    now.year,
+    now.month,
+    now.day,
+  ).subtract(Duration(days: days - 1));
 
-//       final days =
-//           DateTime(now.year, now.month + 1, 0).day;
+  final startTimestamp = startDate.millisecondsSinceEpoch;
 
-//       labels = List.generate(
-//         days,
-//         (i) => "${i + 1}",
-//       );
+  final sales = await (db.select(db.sales)
+        ..where((tbl) => tbl.createdAt.isBiggerOrEqualValue(startTimestamp))
+        ..orderBy([
+          (tbl) => OrderingTerm.asc(tbl.createdAt),
+        ]))
+      .get();
 
-//       break;
+  final Map<DateTime, double> revenueMap = {};
 
-//     //------------------------------------------------------
-//     // Current Year
-//     //------------------------------------------------------
-//     case GraphRange.year:
-//       startDate = DateTime(now.year, 1, 1);
+  for (final sale in sales) {
+    final saleDate = DateTime.fromMillisecondsSinceEpoch(
+      sale.createdAt,
+    );
 
-//       labels = const [
-//         "Jan",
-//         "Feb",
-//         "Mar",
-//         "Apr",
-//         "May",
-//         "Jun",
-//         "Jul",
-//         "Aug",
-//         "Sep",
-//         "Oct",
-//         "Nov",
-//         "Dec",
-//       ];
+    final date = DateTime(
+      saleDate.year,
+      saleDate.month,
+      saleDate.day,
+    );
 
-//       break;
-//   }
+    revenueMap.update(
+      date,
+      (value) => value + sale.grandTotal,
+      ifAbsent: () => sale.grandTotal,
+    );
+  }
 
-//   //----------------------------------------------------------
-//   // Fetch sales
-//   //----------------------------------------------------------
+  final List<RevenuePointDto> result = [];
 
-//   final sales = await (db.select(db.sales)
-//         ..where(
-//           (tbl) => tbl.createdAt.isBiggerOrEqualValue(
-//             startDate.millisecondsSinceEpoch,
-//           ),
-//         ))
-//       .get();
+  for (int i = 0; i < days; i++) {
+    final date = startDate.add(Duration(days: i));
 
-//   final Map<String, double> graph = {};
+    result.add(
+      RevenuePointDto(
+        date: date,
+        revenue: revenueMap[date] ?? 0,
+      ),
+    );
+  }
 
-//   for (final sale in sales) {
-//     final date = DateTime.fromMillisecondsSinceEpoch(
-//       sale.createdAt,
-//     );
+  return result;
+}
+  //  @override
+  // Future<SalesGraphResponseDto> getSalesGraph({
+  //   required GraphRange range,
+  // }) async {
+  //   final now = DateTime.now();
 
-//     late String key;
+  //   late DateTime startDate;
+  //   late List<String> labels;
 
-//     switch (range) {
-//       case GraphRange.week:
-//         key = DateFormat("EEE").format(date);
-//         break;
+  //   switch (range) {
+  //     //------------------------------------------------------
+  //     // Last 7 Days
+  //     //------------------------------------------------------
+  //     case GraphRange.week:
+  //       startDate = now.subtract(const Duration(days: 6));
 
-//       case GraphRange.month:
-//         key = "${date.day}";
-//         break;
+  //       labels = List.generate(
+  //         7,
+  //         (i) => DateFormat(
+  //           'EEE',
+  //         ).format(startDate.add(Duration(days: i))),
+  //       );
 
-//       case GraphRange.year:
-//         key = DateFormat("MMM").format(date);
-//         break;
-//     }
+  //       break;
 
-//     graph[key] =
-//         (graph[key] ?? 0) + sale.grandTotal;
-//   }
+  //     //------------------------------------------------------
+  //     // Current Month
+  //     //------------------------------------------------------
+  //     case GraphRange.month:
+  //       startDate = DateTime(now.year, now.month, 1);
 
-//   final points = labels.map((label) {
-//     return SalesGraphDto(
-//      label: label,
-//     : graph[label] ?? 0,
-      
-//     );
-//   }).toList();
+  //       final days =
+  //           DateTime(now.year, now.month + 1, 0).day;
 
-//   return SalesGraphResponseDto(
-//     range: range,
-//     points: points,
-//   );
-// }
-// }
+  //       labels = List.generate(
+  //         days,
+  //         (i) => "${i + 1}",
+  //       );
+
+  //       break;
+
+  //     //------------------------------------------------------
+  //     // Current Year
+  //     //------------------------------------------------------
+  //     case GraphRange.year:
+  //       startDate = DateTime(now.year, 1, 1);
+
+  //       labels = const [
+  //         "Jan",
+  //         "Feb",
+  //         "Mar",
+  //         "Apr",
+  //         "May",
+  //         "Jun",
+  //         "Jul",
+  //         "Aug",
+  //         "Sep",
+  //         "Oct",
+  //         "Nov",
+  //         "Dec",
+  //       ];
+
+  //       break;
+  //   }
+
+  //   //----------------------------------------------------------
+  //   // Fetch sales
+  //   //----------------------------------------------------------
+
+  //   final sales = await (db.select(db.sales)
+  //         ..where(
+  //           (tbl) => tbl.createdAt.isBiggerOrEqualValue(
+  //             startDate.millisecondsSinceEpoch,
+  //           ),
+  //         ))
+  //       .get();
+
+  //   final Map<String, double> graph = {};
+
+  //   for (final sale in sales) {
+  //     final date = DateTime.fromMillisecondsSinceEpoch(
+  //       sale.createdAt,
+  //     );
+
+  //     late String key;
+
+  //     switch (range) {
+  //       case GraphRange.week:
+  //         key = DateFormat("EEE").format(date);
+  //         break;
+
+  //       case GraphRange.month:
+  //         key = "${date.day}";
+  //         break;
+
+  //       case GraphRange.year:
+  //         key = DateFormat("MMM").format(date);
+  //         break;
+  //     }
+
+  //     graph[key] =
+  //         (graph[key] ?? 0) + sale.grandTotal;
+  //   }
+
+  //   final points = labels.map((label) {
+  //     return SalesGraphDto(
+  //      label: label,
+  //     : graph[label] ?? 0,
+
+  //     );
+  //   }).toList();
+
+  //   return SalesGraphResponseDto(
+  //     range: range,
+  //     points: points,
+  //   );
+  // }
+}
+
+final dashboardLocalDataSourceProvider = Provider<DashboardLocalDataSource>((
+  ref,
+) {
+  return DashboardLocalDataSourceImpl(ref.watch(appDatabaseProvider));
+});

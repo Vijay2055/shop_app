@@ -1,4 +1,5 @@
 import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:shop_app/core/services/printer/utils/printer_logo.dart';
 import 'package:shop_app/features/cart/domain/entities/cart_item.dart';
@@ -133,12 +134,16 @@ class PosReceiptBuilder {
       final itemTotal = item.variant.sellingPrice * item.quantity;
 
       /// ITEM NAME
-      bytes += generator.text(item.variant.variant, styles: PosStyles(bold: true));
+      bytes += generator.text(
+        item.variant.variant,
+        styles: PosStyles(bold: true),
+      );
 
       /// QTY x PRICE + TOTAL
       bytes += generator.row([
         PosColumn(
-          text: '${item.quantity} x ${item.variant.sellingPrice.toStringAsFixed(2)}',
+          text:
+              '${item.quantity} x ${item.variant.sellingPrice.toStringAsFixed(2)}',
           width: 6,
         ),
         PosColumn(
@@ -192,3 +197,7 @@ class PosReceiptBuilder {
     return bytes;
   }
 }
+
+final posReceiptBuilderProvider = Provider<PosReceiptBuilder>(
+  (ref) => PosReceiptBuilder(),
+);

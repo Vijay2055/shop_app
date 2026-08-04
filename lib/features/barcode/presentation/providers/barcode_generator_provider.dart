@@ -40,6 +40,6 @@ class BarcodeNotifier extends Notifier<BarcodeGenerationState> {
 }
 
 final barcodeGeneratorProvider =
-    NotifierProvider<BarcodeNotifier, BarcodeGenerationState>(
+    NotifierProvider.autoDispose<BarcodeNotifier, BarcodeGenerationState>(
       BarcodeNotifier.new,
     );
