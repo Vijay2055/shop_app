@@ -1,8 +1,8 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:shop_app/core/database/app_database.dart';
+import 'package:shop_app/features/category/domain/entity/category_entity.dart';
 import 'package:shop_app/features/product/domain/entities/product_entitiy.dart';
-
 
 part 'product_model.freezed.dart';
 part 'product_model.g.dart';
@@ -12,8 +12,7 @@ abstract class ProductModel with _$ProductModel {
   const factory ProductModel({
     required String id,
 
-    @JsonKey(name: 'category_id')
-    required int categoryId,
+    @JsonKey(name: 'category_id') required int categoryId,
 
     required String name,
 
@@ -21,15 +20,11 @@ abstract class ProductModel with _$ProductModel {
 
     String? image,
 
-    @JsonKey(name: 'is_active')
-    @Default(true)
-    bool isActive,
+    @JsonKey(name: 'is_active') @Default(true) bool isActive,
 
-    @JsonKey(name: 'created_at')
-    required DateTime createdAt,
+    @JsonKey(name: 'created_at') required DateTime createdAt,
 
-    @JsonKey(name: 'updated_at')
-    required DateTime updatedAt,
+    @JsonKey(name: 'updated_at') required DateTime updatedAt,
   }) = _ProductModel;
 
   factory ProductModel.fromJson(Map<String, dynamic> json) =>
@@ -38,7 +33,7 @@ abstract class ProductModel with _$ProductModel {
   factory ProductModel.fromEntity(ProductEntity entity) {
     return ProductModel(
       id: entity.id,
-      categoryId: entity.categoryId,
+      categoryId: entity.category.id??0,
       name: entity.name,
       description: entity.description,
       image: entity.image,
@@ -49,13 +44,12 @@ abstract class ProductModel with _$ProductModel {
   }
 }
 
-
 /// Model -> Entity
 extension ProductModelToEntity on ProductModel {
-  ProductEntity toEntity() {
+  ProductEntity toEntity(CategoryEntity category) {
     return ProductEntity(
       id: id,
-      categoryId: categoryId,
+      category: category,
       name: name,
       description: description,
       image: image,
@@ -113,6 +107,3 @@ extension ProductModelToDrift on ProductModel {
     );
   }
 }
-
-
-

@@ -8,7 +8,6 @@ abstract interface class SaleHistoryRepository {
     required int limit,
     String? search,
     String? paymentStatus,
-    
   });
 
   Future<Result<int>> getSaleHistoryCount({String? search});
@@ -18,4 +17,6 @@ abstract interface class SaleHistoryRepository {
     required String saleId,
     required double amount,
   });
+
+  Future<Result<void>> deleteHistory({required String saleId});
 }

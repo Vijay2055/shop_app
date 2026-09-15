@@ -1,10 +1,7 @@
 enum SaleHistoryAction {
   view,
-  print,
-  pdf,
-  receivePayment,
-  editNote,
-  cancel,
+  delete,
+ 
 }
 
 enum PaymentFilter {

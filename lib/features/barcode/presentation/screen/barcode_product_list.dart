@@ -117,11 +117,8 @@ class BarcodeProductList extends ConsumerWidget {
                             label: Text("Product"),
                           ),
 
-                          const DataColumn2(label: Text("Sku")),
-
                           const DataColumn2(label: Text("Barcode")),
-                          const DataColumn2(label: Text("MRP")),
-                          const DataColumn2(label: Text("S.P")),
+                          const DataColumn(label: Text("Stock")),
 
                           const DataColumn2(label: Text("Labels")),
                         ],
@@ -145,15 +142,6 @@ class BarcodeProductList extends ConsumerWidget {
                               DataCell(
                                 Row(
                                   children: [
-                                    CircleAvatar(
-                                      radius: 18,
-                                      child: Text(
-                                        product.variant.trim().substring(1, 1) ,
-                                      ),
-                                    ),
-
-                                    const SizedBox(width: 12),
-
                                     Expanded(
                                       child: Text(
                                         product.variant,
@@ -164,11 +152,9 @@ class BarcodeProductList extends ConsumerWidget {
                                 ),
                               ),
 
-                              DataCell(Text(product.sku)),
-
                               DataCell(SelectableText(product.barcode)),
-                              DataCell(Text(product.mrp.toString())),
-                              DataCell(Text(product.sellingPrice.toString())),
+                              DataCell(Text(product.stock.toString())),
+
                               DataCell(
                                 Container(
                                   width: 120,

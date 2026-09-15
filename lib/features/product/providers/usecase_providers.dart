@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shop_app/features/category/domain/repository/category_repository.dart';
 import 'package:shop_app/features/product/data/repositories/product_repository_impl.dart';
 import 'package:shop_app/features/product/domain/usecase/add_product_usecase.dart';
+import 'package:shop_app/features/product/domain/usecase/generate_barcode_usecase.dart';
+import 'package:shop_app/features/product/domain/usecase/generate_sku_code.dart';
 import 'package:shop_app/features/product/domain/usecase/getProductForEdit.dart';
 import 'package:shop_app/features/product/domain/usecase/getProductVariantlist_usecase.dart';
 import 'package:shop_app/features/product/domain/usecase/getProduct_counts.dart';
@@ -68,3 +70,11 @@ final getProductVariantByBarcodeUsecaseProvider =
         ref.watch(productRepositoryProvider),
       );
     });
+
+final generateBarcodeProvider = Provider<GenerateBarcodeUsecase>((ref) {
+  return GenerateBarcodeUsecase(ref.watch(productRepositoryProvider));
+});
+
+final generateSkuProvider = Provider<GenerateSkuUsecase>((ref) {
+  return GenerateSkuUsecase(ref.watch(productRepositoryProvider));
+});

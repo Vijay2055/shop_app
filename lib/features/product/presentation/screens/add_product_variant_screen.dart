@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shop_app/features/product/domain/entities/product_varient_draft.dart';
+import 'package:shop_app/features/product/presentation/providers/generate_barcode_provider.dart';
+import 'package:shop_app/features/product/presentation/providers/generate_sku_provider.dart';
 import 'package:shop_app/features/product/presentation/widgets/variant_basic_info.dart';
 import 'package:shop_app/features/product/presentation/widgets/variant_bottom_bar.dart';
 import 'package:shop_app/features/product/presentation/widgets/variant_pricing_card.dart';
 import 'package:shop_app/features/product/presentation/widgets/varient_inventory_card.dart';
 
-class AddVariantScreen extends StatefulWidget {
+class AddVariantScreen extends ConsumerStatefulWidget {
   const AddVariantScreen({super.key, required this.variantDraft});
 
   final ProductVariantDraft? variantDraft;
 
   @override
-  State<AddVariantScreen> createState() => _AddVariantScreenState();
+  ConsumerState<AddVariantScreen> createState() => _AddVariantScreenState();
 }
 
-class _AddVariantScreenState extends State<AddVariantScreen> {
+class _AddVariantScreenState extends ConsumerState<AddVariantScreen> {
   final _formKey = GlobalKey<FormState>();
 
   /// Basic
@@ -81,56 +84,76 @@ class _AddVariantScreenState extends State<AddVariantScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final barcode = ref.watch(generateBarocdeNotifierProvider);
+    final sku = ref.watch(generateSkuNotifierProvider);
+    if (sku.isNotEmpty) {
+      skuController.text = sku;
+    }
+    if (barcode.isNotEmpty) {
+      barcodeController.text = barcode;
+    }
     return Scaffold(
       appBar: AppBar(title: const Text("Add Variant")),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 950),
-              child: Column(
-                children: [
-                  VariantBasicInfo(
-                    skuController: skuController,
-                    barcodeController: barcodeController,
-                    colorController: colorController,
-                    sizeController: sizeController,
-                  ),
+      body: Card(
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 950),
+                child: Column(
+                  children: [
+                    VariantBasicInfo(
+                      skuController: skuController,
+                      barcodeController: barcodeController,
+                      colorController: colorController,
+                      sizeController: sizeController,
+                      onGenerateBarcode: () async {
+                        await ref
+                            .read(generateBarocdeNotifierProvider.notifier)
+                            .onGenerate();
+                      },
+                      onGenerateSKU: () async {
+                        await ref
+                            .read(generateSkuNotifierProvider.notifier)
+                            .onGenerate();
+                      },
+                    ),
 
-                  const SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
-                  VariantPricingCard(
-                    costPriceController: costPriceController,
-                    sellingPriceController: sellingPriceController,
-                    mrpController: mrpController,
-                    vatController: vatController,
-                    discountController: discountController,
-                  ),
+                    VariantPricingCard(
+                      costPriceController: costPriceController,
+                      sellingPriceController: sellingPriceController,
+                      mrpController: mrpController,
+                      vatController: vatController,
+                      discountController: discountController,
+                    ),
 
-                  const SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
-                  VariantInventoryCard(
-                    stockController: stockController,
-                    minimumStockController: minimumStockController,
-                    isActive: isActive,
-                    onActiveChanged: (value) {
-                      setState(() {
-                        isActive = value;
-                      });
-                    },
-                  ),
+                    VariantInventoryCard(
+                      stockController: stockController,
+                      minimumStockController: minimumStockController,
+                      isActive: isActive,
+                      onActiveChanged: (value) {
+                        setState(() {
+                          isActive = value;
+                        });
+                      },
+                    ),
 
-                  const SizedBox(height: 30),
+                    const SizedBox(height: 30),
 
-                  VariantBottomBar(
-                    onCancel: () {
-                      Navigator.pop(context);
-                    },
-                    onSave: _saveVariant,
-                  ),
-                ],
+                    VariantBottomBar(
+                      onCancel: () {
+                        Navigator.pop(context);
+                      },
+                      onSave: _saveVariant,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -151,9 +174,7 @@ class _AddVariantScreenState extends State<AddVariantScreen> {
       color: colorController.text.trim().isEmpty
           ? null
           : colorController.text.trim(),
-      variant: 
-          
-          sizeController.text.trim(),
+      variant: sizeController.text.trim(),
       costPrice: double.parse(costPriceController.text),
       sellingPrice: double.parse(sellingPriceController.text),
       mrp: double.parse(mrpController.text),

@@ -1,5 +1,6 @@
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shop_app/features/product/domain/entities/product_varient_draft.dart';
 
 class ProductVariantTable extends StatelessWidget {
@@ -67,7 +68,7 @@ class ProductVariantTable extends StatelessWidget {
                         columns: const [
                           DataColumn2(
                             label: Text(
-                              "SKU",
+                              "Variant",
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),
@@ -75,13 +76,6 @@ class ProductVariantTable extends StatelessWidget {
                           DataColumn2(
                             label: Text(
                               "Barcode",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-
-                          DataColumn2(
-                            label: Text(
-                              "Size",
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),
@@ -96,6 +90,13 @@ class ProductVariantTable extends StatelessWidget {
                           DataColumn2(
                             label: Text(
                               "Selling Price",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+
+                          DataColumn2(
+                            label: Text(
+                              "MRP",
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),
@@ -124,15 +125,14 @@ class ProductVariantTable extends StatelessWidget {
                               onItemTap(item);
                             },
                             cells: [
-                              DataCell(Text(item.sku.toString())),
+                              DataCell(Text(item.variant.toString())),
 
                               DataCell(Text(item.barcode.toString())),
-
-                              DataCell(Text(item.variant.toString())),
 
                               DataCell(Text(item.costPrice.toString())),
 
                               DataCell(Text(item.sellingPrice.toString())),
+                              DataCell(Text(item.mrp.toString())),
 
                               DataCell(Text(item.stock.toString())),
 
@@ -142,7 +142,37 @@ class ProductVariantTable extends StatelessWidget {
                                     Icons.delete_outline,
                                     color: Colors.red,
                                   ),
-                                  onPressed: () => onDelete(index),
+                                  onPressed: () {
+                                    showDialog(
+                                      barrierDismissible: true,
+
+                                      context: context,
+                                      builder: (ctx) {
+                                        return AlertDialog(
+                                          title: Text("Confirm"),
+                                          content: Text(
+                                            "Are you sure? You want to delete this product",
+                                          ),
+                                          actions: [
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                onDelete(index);
+                                                ctx.pop();
+                                              },
+                                              child: Text("Yes"),
+                                            ),
+
+                                            OutlinedButton(
+                                              onPressed: () {
+                                                ctx.pop();
+                                              },
+                                              child: Text("Cancel"),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  },
                                 ),
                               ),
                             ],

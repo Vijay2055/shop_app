@@ -3,9 +3,9 @@ import 'package:shop_app/features/history/domain/entity/sale_history_detail_enti
 class SaleDetailState {
   final bool isLoading;
   final SaleHistoryDetailEntity? sale;
-  final String? error;
+  final String error;
 
-  const SaleDetailState({this.isLoading = false, this.sale, this.error});
+  const SaleDetailState({this.isLoading = false, this.sale, this.error = ''});
 
   SaleDetailState copyWith({
     bool? isLoading,
@@ -15,7 +15,7 @@ class SaleDetailState {
     return SaleDetailState(
       isLoading: isLoading ?? this.isLoading,
       sale: sale ?? this.sale,
-      error: error,
+      error: error ?? this.error,
     );
   }
 }

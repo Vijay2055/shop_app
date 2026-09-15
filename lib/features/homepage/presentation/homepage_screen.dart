@@ -1,8 +1,11 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shop_app/core/constants/extensions/num_extension.dart';
 import 'package:shop_app/features/homepage/presentation/providers/dashboard_revenue_provider.dart';
 import 'package:shop_app/features/homepage/presentation/providers/dashboard_summary_provider.dart';
+import 'package:shop_app/features/homepage/presentation/widgets/stat_card.dart';
+import 'package:shop_app/features/homepage/presentation/widgets/top_product_row.dart';
 
 class HomepageScreen extends ConsumerWidget {
   const HomepageScreen({super.key});
@@ -43,25 +46,25 @@ class HomepageScreen extends ConsumerWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: _StatCard(
+                        child: StatCard(
                           title: "Revenue",
-                          value: "Rs ${summaryState.entity!.totalSales}",
+                          value: "Rs ${summaryState.entity!.totalSales.amount}",
                           icon: Icons.payments,
                           color: Colors.green,
                         ),
                       ),
                       SizedBox(width: 16),
                       Expanded(
-                        child: _StatCard(
+                        child: StatCard(
                           title: "Due Amount",
-                          value: "Rs ${summaryState.entity!.totalDue}",
+                          value: "Rs ${summaryState.entity!.totalDue.amount}",
                           icon: Icons.shopping_cart,
                           color: Colors.blue,
                         ),
                       ),
                       SizedBox(width: 16),
                       Expanded(
-                        child: _StatCard(
+                        child: StatCard(
                           title: "Products",
                           value: '${summaryState.entity!.totalVariants}',
                           icon: Icons.inventory_2,
@@ -70,7 +73,7 @@ class HomepageScreen extends ConsumerWidget {
                       ),
                       SizedBox(width: 16),
                       Expanded(
-                        child: _StatCard(
+                        child: StatCard(
                           title: "Low Stock",
                           value: '${summaryState.entity!.lowStockProducts}',
                           icon: Icons.warning,
@@ -83,12 +86,12 @@ class HomepageScreen extends ConsumerWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: _StatCard(
+                        child: StatCard(
                           title: summaryState.entity!.totalProfit >= 0
                               ? "Profit"
                               : "Loss",
                           value:
-                              "Rs ${summaryState.entity!.totalProfit >= 0 ? summaryState.entity!.totalProfit : summaryState.entity!.totalProfit.abs()}",
+                              "Rs ${summaryState.entity!.totalProfit >= 0 ? summaryState.entity!.totalProfit.amount : summaryState.entity!.totalProfit.abs().amount}",
                           icon: summaryState.entity!.totalProfit >= 0
                               ? Icons.trending_up
                               : Icons.trending_down,
@@ -99,27 +102,29 @@ class HomepageScreen extends ConsumerWidget {
                       ),
                       const SizedBox(width: 16),
                       Expanded(
-                        child: _StatCard(
+                        child: StatCard(
                           title: "Total Cost",
-                          value: "Rs ${summaryState.entity!.totalCostPrice}",
+                          value:
+                              "Rs ${summaryState.entity!.totalCostPrice.amount}",
                           icon: Icons.payments_outlined,
                           color: Colors.blue,
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
-                        child: _StatCard(
+                        child: StatCard(
                           title: "VAT Amount",
-                          value: "Rs ${summaryState.entity!.totalVatCp}",
+                          value: "Rs ${summaryState.entity!.totalVatCp.amount}",
                           icon: Icons.receipt_long,
                           color: Colors.orange,
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
-                        child: _StatCard(
+                        child: StatCard(
                           title: "Total Purchase",
-                          value: "Rs ${summaryState.entity!.totalPurchaseAmt}",
+                          value:
+                              "Rs ${summaryState.entity!.totalPurchaseAmt.amount}",
                           icon: Icons.shopping_bag,
                           color: Colors.deepPurple,
                         ),
@@ -288,9 +293,9 @@ class HomepageScreen extends ConsumerWidget {
 
                               ...summaryState.entity!.topSellingProducts
                                   .map(
-                                    (item) => _row(
-                                      item.productName,
-                                      item.quantitySold.toString(),
+                                    (item) => TopProductRow(
+                                      name: item.productName,
+                                      value: item.quantitySold.toString(),
                                     ),
                                   )
                                   .toList(),
@@ -334,88 +339,6 @@ class HomepageScreen extends ConsumerWidget {
                   // ),
                 ],
               ),
-      ),
-    );
-  }
-
-  /// 📦 TOP PRODUCTS ROW
-  static Widget _row(String name, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(name),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
-        ],
-      ),
-    );
-  }
-
-  /// 🔔 NOTIFICATION ITEM
-  static Widget _notif(String text, Color color) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          Icon(Icons.circle, size: 10, color: color),
-          const SizedBox(width: 10),
-          Expanded(child: Text(text)),
-        ],
-      ),
-    );
-  }
-}
-
-/// 🔥 STAT CARD
-class _StatCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData icon;
-  final Color color;
-
-  const _StatCard({
-    required this.title,
-    required this.value,
-    required this.icon,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [BoxShadow(blurRadius: 10, color: Colors.black12)],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: color),
-          ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: TextStyle(color: Colors.grey[600])),
-              const SizedBox(height: 4),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }

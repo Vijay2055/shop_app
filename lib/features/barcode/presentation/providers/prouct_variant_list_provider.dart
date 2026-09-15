@@ -17,7 +17,7 @@ class ProductVariantListNotifier extends Notifier<ProductListBarcodeState> {
     state = state.copyWith(isLoading: true, error: null);
     final result = await ref.read(getProductVariantListUsecaseProvider)(
       page: page,
-      limit: 3,
+      limit: state.pageSize,
     );
     final countResult = await ref.read(getProductVariantCountUsecaseProvider)();
 
@@ -31,7 +31,7 @@ class ProductVariantListNotifier extends Notifier<ProductListBarcodeState> {
           totalProductVariants: count,
           error: null,
           currentPage: page,
-          pageSize: 3,
+
           searchQuery: "",
           isLoading: false,
         );
@@ -100,6 +100,7 @@ class ProductVariantListNotifier extends Notifier<ProductListBarcodeState> {
 }
 
 final productVariantListNotifierProvider =
-    NotifierProvider.autoDispose<ProductVariantListNotifier, ProductListBarcodeState>(
-      ProductVariantListNotifier.new,
-    );
+    NotifierProvider.autoDispose<
+      ProductVariantListNotifier,
+      ProductListBarcodeState
+    >(ProductVariantListNotifier.new);

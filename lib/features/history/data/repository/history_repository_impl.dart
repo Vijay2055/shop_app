@@ -74,6 +74,16 @@ class SaleHistoryRepositoryImpl implements SaleHistoryRepository {
       return FailureResult(DatabaseFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Result<void>> deleteHistory({required String saleId}) async {
+    try {
+      await _localDataSource.deleteHistory(saleId: saleId);
+      return Success(null);
+    } catch (e) {
+      return FailureResult(DatabaseFailure(e.toString()));
+    }
+  }
 }
 
 final saleHistoryRepositoryProvider = Provider<SaleHistoryRepository>((ref) {

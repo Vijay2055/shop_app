@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shop_app/features/billing/application/billing_notifier.dart';
 import 'package:shop_app/features/billing/application/message_notifier.dart';
 import 'package:shop_app/features/billing/presentation/widget/billing_bottom_widget.dart';
 import 'package:shop_app/features/billing/presentation/widget/billing_payment_pannel.dart';
@@ -32,11 +31,11 @@ class BillingScreen extends ConsumerWidget {
     final cartRead = ref.read(cartProvider.notifier);
 
     ref.listen(messageProvider, (previous, next) {
-      if (previous?.message == next.message || next.message == null) {
+      if (next.message.isEmpty) {
         return;
       }
 
-      _showSnack(next.message!, context, isError: next.isError);
+      _showSnack(next.message, context, isError: next.isError);
     });
 
     return Row(

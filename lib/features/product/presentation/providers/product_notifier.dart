@@ -15,7 +15,7 @@ class ProductNotifier extends AsyncNotifier<ProductState> {
   Future<ProductState> _loadProduct({required int page}) async {
     final productResult = await ref.read(getProductsUseCaseProvider)(
       page: page,
-      limit: 3,
+      limit: state.value?.pageSize ?? 10,
     );
     final countResult = await ref.read(getProductCountsUsecaseProvider)();
 
@@ -27,7 +27,7 @@ class ProductNotifier extends AsyncNotifier<ProductState> {
         return ProductState(
           products: data,
           currentPage: page,
-          pageSize: 3,
+          pageSize: state.value?.pageSize ?? 10,
           totalProducts: total,
         );
 
@@ -87,4 +87,3 @@ class ProductNotifier extends AsyncNotifier<ProductState> {
     }
   }
 }
-

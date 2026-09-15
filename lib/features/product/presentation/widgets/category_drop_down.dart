@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shop_app/features/category/domain/entity/category_entity.dart';
 import 'package:shop_app/features/category/presentation/providers/category_provider.dart';
 
 class CategoryDropDown extends ConsumerWidget {
@@ -8,15 +9,15 @@ class CategoryDropDown extends ConsumerWidget {
     required this.onCategoryChanged,
     required this.selectedCategory,
   });
-  final int? selectedCategory;
-  final ValueChanged<int?> onCategoryChanged;
+  final CategoryEntity? selectedCategory;
+  final ValueChanged<CategoryEntity?> onCategoryChanged;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final categoryState = ref.watch(categoryProvider);
     return categoryState.when(
       data: (data) {
-        return DropdownButtonFormField<int>(
+        return DropdownButtonFormField<CategoryEntity>(
           initialValue: selectedCategory,
           decoration: const InputDecoration(
             labelText: 'Category *',
@@ -24,7 +25,7 @@ class CategoryDropDown extends ConsumerWidget {
           ),
           items: data.categories.map((category) {
             return DropdownMenuItem(
-              value: category.id,
+              value: category,
               child: Text(category.name),
             );
           }).toList(),

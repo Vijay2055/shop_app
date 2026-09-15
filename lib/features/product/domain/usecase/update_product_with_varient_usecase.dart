@@ -1,4 +1,5 @@
 import 'package:shop_app/core/utils/result.dart';
+import 'package:shop_app/features/category/domain/entity/category_entity.dart';
 import 'package:shop_app/features/product/domain/entities/product_entitiy.dart';
 import 'package:shop_app/features/product/domain/entities/product_variant_entity.dart';
 import 'package:shop_app/features/product/domain/entities/product_varient_draft.dart';
@@ -14,14 +15,14 @@ class UpdateProductWithVariantUseCase {
     required String productId,
     required String name,
     required String description,
-    required int categoryId,
+    required CategoryEntity category,
     required List<ProductVariantDraft> variants,
   }) async {
     final now = DateTime.now();
 
     final product = ProductEntity(
       id: productId,
-      categoryId: categoryId,
+      category: category,
       name: name,
       description: description,
       image: null,

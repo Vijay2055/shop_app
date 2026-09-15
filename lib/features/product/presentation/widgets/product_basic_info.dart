@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shop_app/features/category/domain/entity/category_entity.dart';
 import 'package:shop_app/features/product/presentation/widgets/add_category_dialogue.dart';
 import 'package:shop_app/features/product/presentation/widgets/category_drop_down.dart';
 
@@ -16,9 +17,9 @@ class ProductBasicInfo extends StatelessWidget {
   final TextEditingController descriptionController;
   final bool isEdit;
 
-  final int? selectedCategory;
+  final CategoryEntity? selectedCategory;
 
-  final ValueChanged<int?> onCategoryChanged;
+  final ValueChanged<CategoryEntity?> onCategoryChanged;
 
   @override
   Widget build(BuildContext context) {

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shop_app/core/errors/failure.dart';
 import 'package:shop_app/core/utils/result.dart';
+import 'package:shop_app/features/category/domain/entity/category_entity.dart';
 import 'package:shop_app/features/product/domain/entities/product_varient_draft.dart';
 import 'package:shop_app/features/product/presentation/providers/product_provider.dart';
 import 'package:shop_app/features/product/presentation/state/add_product_state.dart';
@@ -13,7 +14,7 @@ class AddProductNotifier extends AsyncNotifier<AddProductState> {
     return const AddProductState();
   }
 
-  void selectCategory(int categoryId) {
+  void selectCategory(CategoryEntity categoryId) {
     state = AsyncData(
       state.requireValue.copyWith(selectedCategory: categoryId),
     );
@@ -52,7 +53,7 @@ class AddProductNotifier extends AsyncNotifier<AddProductState> {
       case Success(:final data):
         state = AsyncData(
           AddProductState(
-            selectedCategory: data.category.id,
+            selectedCategory: data.category,
             variants: data.variants
                 .map((value) => ProductVariantDraft.fromEntity(value))
                 .toList(),
@@ -99,7 +100,7 @@ class AddProductNotifier extends AsyncNotifier<AddProductState> {
         .call(
           name: name,
           description: description,
-          categoryId: current.selectedCategory ?? 0,
+          categoryId: current.selectedCategory!,
           variants: current.variants,
         );
 
@@ -140,7 +141,7 @@ class AddProductNotifier extends AsyncNotifier<AddProductState> {
           productId: productId,
           name: name,
           description: description,
-          categoryId: current.selectedCategory!,
+          category: current.selectedCategory!,
           variants: current.variants,
         );
 

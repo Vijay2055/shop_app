@@ -1,18 +1,12 @@
 class MessageState {
-  final String? message;
+  final String message;
   final bool isError;
 
-  const MessageState({
-    this.message,
-    this.isError = false,
-  });
+  const MessageState({this.message = '', this.isError = false});
 
-  MessageState copyWith({
-    String? message,
-    bool? isError,
-  }) {
+  MessageState copyWith({String? message, bool? isError}) {
     return MessageState(
-      message: message,
+      message: message ?? this.message,
       isError: isError ?? this.isError,
     );
   }

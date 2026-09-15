@@ -1,7 +1,9 @@
+import 'package:shop_app/features/category/domain/entity/category_entity.dart';
+
 class ProductEntity {
   final String id;
 
-  final int categoryId;
+  final CategoryEntity category;
 
   final String name;
 
@@ -17,7 +19,7 @@ class ProductEntity {
 
   const ProductEntity({
     required this.id,
-    required this.categoryId,
+    required this.category,
     required this.name,
     this.description,
     this.image,

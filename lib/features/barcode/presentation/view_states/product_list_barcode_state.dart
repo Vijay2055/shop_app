@@ -15,7 +15,7 @@ class ProductListBarcodeState {
     this.products = const [],
     this.searchQuery = '',
     this.currentPage = 1,
-    this.pageSize = 3,
+    this.pageSize = 10,
     this.isLoading = false,
     this.totalProductVariants = 0,
   });

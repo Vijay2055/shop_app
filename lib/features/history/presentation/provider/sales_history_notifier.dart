@@ -112,6 +112,25 @@ class SaleHistoryNotifier extends Notifier<SaleHistoryState> {
     state = state.copyWith(paymentFilter: filter);
     loadPage(1);
   }
+
+  Future<void> deleteSale(String saleId) async {
+    state = state.copyWith(message: "",isLoading: true);
+    final result = await ref.read(deleteHistoryUsecaseProvider)(saleId);
+    switch (result) {
+      case Success<void>():
+        // TODO: Handle this case.
+        final prevSale = state.sales;
+
+        final updateSale = prevSale.where((item) => item.id != saleId).toList();
+        state = state.copyWith(
+          sales: updateSale,
+          message: "Deleted Successful",
+          isLoading: false
+        );
+      case FailureResult<void>(:final failure):
+        state = state.copyWith(message: failure.message,isLoading: false);
+    }
+  }
 }
 
 final saleHistoryProvider =

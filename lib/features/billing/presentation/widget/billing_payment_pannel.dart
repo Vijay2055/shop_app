@@ -1,18 +1,17 @@
 import 'dart:math';
 
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:shop_app/app/pages.dart';
-import 'package:shop_app/core/services/printer/receipt_pdf_builder.dart';
 import 'package:shop_app/features/billing/application/billing_notifier.dart';
 import 'package:shop_app/features/cart/application/cart_notifier.dart';
 import 'package:shop_app/features/customer/domain/entity/customer_entity.dart';
 import 'package:uuid/uuid.dart';
 
 class BillingPaymentPannel extends ConsumerWidget {
-  const BillingPaymentPannel({super.key});
+  BillingPaymentPannel({super.key});
+  TextEditingController receivedAmtCtrl = TextEditingController();
 
   void _onPressed(
     BuildContext context,
@@ -20,16 +19,6 @@ class BillingPaymentPannel extends ConsumerWidget {
     double receivedAmount,
   ) async {
     ref.read(billingProvider.notifier).generateBill(receivedAmount);
-
-    // final cart = ref.read(cartProvider);
-
-    // final pdfBytes = await ref
-    //     .read(receiptPdfBuilderProvider)
-    //     .buildReceipt(
-    //       billNumber: "INV0001", // or your invoice number
-    //       cart: cart.items,
-    //       total: cart.totalAmount,
-    //     );
   }
 
   @override
@@ -69,6 +58,7 @@ class BillingPaymentPannel extends ConsumerWidget {
           SizedBox(height: 25),
 
           TextFormField(
+            controller: receivedAmtCtrl,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}$')),
@@ -241,9 +231,10 @@ class BillingPaymentPannel extends ConsumerWidget {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
+                receivedAmtCtrl.clear();
 
                 /// Clear the cart
-                // ref.read(cartProvider.notifier).clearCart();
+                ref.read(cartProvider.notifier).clearCart();
               },
               child: const Text("Yes"),
             ),

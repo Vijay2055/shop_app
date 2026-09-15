@@ -1,5 +1,5 @@
 #define MyAppName "Hina Enterprises POS"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.0.1"
 #define MyAppPublisher "Bijay Yadav"
 #define MyAppExeName "shop_app.exe"
 

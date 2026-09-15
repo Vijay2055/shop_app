@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shop_app/core/database/app_database.dart';
@@ -48,6 +50,9 @@ abstract class ProductLocalDataSource {
     Product product,
     List<ProductVariant> variants,
   );
+
+  Future<String> generateUniqueBarcode();
+  Future<String> generateUniqueSku();
 }
 
 class ProductLocalDataSourceImpl implements ProductLocalDataSource {
@@ -377,14 +382,72 @@ class ProductLocalDataSourceImpl implements ProductLocalDataSource {
   Future<List<ProductVariant>> searchProductVariants(String query) async {
     return await (_database.select(_database.productVariants)..where(
           (tbl) =>
-              tbl.variant.like('%$query%') |
-              tbl.barcode.like('%$query%') |
-              tbl.sku.like('%$query%') & tbl.isActive.equals(true),
+              ((tbl.variant.like('%$query%')) |
+                  tbl.barcode.like('%$query%') |
+                  tbl.sku.like('%$query%')) &
+              tbl.isActive.equals(true),
         ))
         .get();
   }
+
+  // @override
+  // Future<void> initializeSkuBarcode() async {
+  //   final tracker = await (_database.select(
+  //     _database.skuBarcodeTracker,
+  //   )..where((t) => t.id.equals(1))).getSingleOrNull();
+
+  //   if (tracker != null) {
+  //     return;
+  //   }
+  //   await _database
+  //       .into(_database.skuBarcodeTracker)
+  //       .insert(
+  //         SkuBarcodeTrackerCompanion.insert(
+  //           sku: 'SKU0000',
+  //           barcode: '1000000000000',
+  //         ),
+  //       );
+  // }
+
+  @override
+  Future<String> generateUniqueBarcode() async {
+    final random = Random();
+
+    while (true) {
+      final barcode = List.generate(13, (_) => random.nextInt(10)).join();
+
+      final existing = await (_database.select(
+        _database.productVariants,
+      )..where((t) => t.barcode.equals(barcode))).getSingleOrNull();
+
+      if (existing == null) {
+        return barcode;
+      }
+    }
+  }
+
+  @override
+  Future<String> generateUniqueSku() async {
+    final random = Random();
+
+    while (true) {
+      final number = random.nextInt(10000);
+
+      final sku = 'VI-${number.toString().padLeft(4, '0')}';
+
+      final existing = await (_database.select(
+        _database.productVariants,
+      )..where((t) => t.sku.equals(sku))).getSingleOrNull();
+
+      if (existing == null) {
+        return sku;
+      }
+    }
+  }
 }
 
-final productLocalDataSourceProvider = Provider<ProductLocalDataSource>(
-  (ref) => ProductLocalDataSourceImpl(ref.watch(appDatabaseProvider)),
-);
+final productLocalDataSourceProvider = Provider<ProductLocalDataSource>((ref) {
+  final dataSource = ProductLocalDataSourceImpl(ref.watch(appDatabaseProvider));
+
+  return dataSource;
+});

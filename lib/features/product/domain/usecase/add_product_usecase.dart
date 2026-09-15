@@ -1,4 +1,5 @@
 import 'package:shop_app/core/utils/result.dart';
+import 'package:shop_app/features/category/domain/entity/category_entity.dart';
 import 'package:shop_app/features/product/domain/entities/product_varient_draft.dart';
 import 'package:shop_app/features/product/domain/entities/product_entitiy.dart';
 import 'package:shop_app/features/product/domain/entities/product_variant_entity.dart';
@@ -13,7 +14,7 @@ class AddProductUseCase {
   Future<Result<void>> call({
     required String name,
     required String description,
-    required int categoryId,
+    required CategoryEntity categoryId,
     required List<ProductVariantDraft> variants,
   }) async {
     final now = DateTime.now();
@@ -22,7 +23,7 @@ class AddProductUseCase {
 
     final product = ProductEntity(
       id: productId,
-      categoryId: categoryId,
+      category: categoryId,
       name: name,
       description: description,
       image: null,

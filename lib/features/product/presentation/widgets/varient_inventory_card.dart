@@ -19,10 +19,10 @@ class VariantInventoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      
       elevation: .5,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -30,9 +30,9 @@ class VariantInventoryCard extends StatelessWidget {
           children: [
             Text(
               'Inventory',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 24),
@@ -76,10 +76,7 @@ class VariantInventoryCard extends StatelessWidget {
 }
 
 class _IntegerField extends StatelessWidget {
-  const _IntegerField({
-    required this.controller,
-    required this.label,
-  });
+  const _IntegerField({required this.controller, required this.label});
 
   final TextEditingController controller;
   final String label;
@@ -89,9 +86,7 @@ class _IntegerField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       keyboardType: TextInputType.number,
-      inputFormatters: [
-        FilteringTextInputFormatter.digitsOnly,
-      ],
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
       decoration: InputDecoration(
         labelText: label,
         border: const OutlineInputBorder(),

@@ -20,6 +20,7 @@ abstract interface class SaleHistoryLocalDataSource {
   Future<int> getSaleHistoryCount({String? search});
   Future<SaleHistoryDetailEntity?> getSaleHistoryDetail(String saleId);
   Future<void> receivePayment({required String saleId, required double amount});
+  Future<void> deleteHistory({required String saleId});
 }
 
 class SaleHistoryLocalDatasourceImpl implements SaleHistoryLocalDataSource {
@@ -185,6 +186,19 @@ class SaleHistoryLocalDatasourceImpl implements SaleHistoryLocalDataSource {
           updatedAt: Value(DateTime.now().millisecondsSinceEpoch),
         ),
       );
+    });
+  }
+
+  @override
+  Future<void> deleteHistory({required String saleId}) async {
+    await db.transaction(() async {
+      // Delete all items belonging to this sale first.
+      await (db.delete(
+        db.saleItems,
+      )..where((t) => t.saleId.equals(saleId))).go();
+
+      // Then delete the sale itself.
+      await (db.delete(db.sales)..where((t) => t.id.equals(saleId))).go();
     });
   }
 }

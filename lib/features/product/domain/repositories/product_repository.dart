@@ -22,7 +22,9 @@ abstract class ProductRepository {
   Future<Result<void>> updateProduct(ProductEntity product);
 
   Future<Result<void>> deleteProduct(String productId);
-  Future<Result<List<ProductVariantEntity>>> searchProductVariants(String query);
+  Future<Result<List<ProductVariantEntity>>> searchProductVariants(
+    String query,
+  );
 
   // ------------------------
   // Product Variant
@@ -57,6 +59,8 @@ abstract class ProductRepository {
   );
 
   Future<Result<int>> getProductVariantCount();
+  Future<Result<String>> getBarcode();
+  Future<Result<String>> getSku();
 
   // Future<Result<ProductForEdit>> getProductForEdit(String productId);
 }

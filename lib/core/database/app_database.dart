@@ -9,6 +9,7 @@ import 'package:shop_app/core/database/tables/customer_table.dart';
 import 'package:shop_app/core/database/tables/product_variant_table.dart';
 import 'package:shop_app/core/database/tables/sales_item_table.dart';
 import 'package:shop_app/core/database/tables/sales_table.dart';
+import 'package:shop_app/core/database/tables/sku_barcode_tracker.dart';
 
 import 'tables/product_table.dart';
 
@@ -23,6 +24,7 @@ part 'app_database.g.dart';
     Sales,
     SaleItems,
     AppSettings,
+    SkuBarcodeTracker
   ],
 )
 class AppDatabase extends _$AppDatabase {

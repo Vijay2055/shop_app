@@ -31,10 +31,10 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    if (state.error != null) {
+    if (state.error.isNotEmpty) {
       return Scaffold(
         appBar: AppBar(title: const Text("Sale Details")),
-        body: Center(child: Text(state.error!)),
+        body: Center(child: Text(state.error)),
       );
     }
 

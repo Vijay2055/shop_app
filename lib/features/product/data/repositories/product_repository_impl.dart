@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shop_app/core/errors/failure.dart';
 import 'package:shop_app/core/utils/result.dart';
+import 'package:shop_app/features/category/data/category_data_source.dart';
+import 'package:shop_app/features/category/data/models/category_model.dart';
 import 'package:shop_app/features/product/data/datasources/product_local_datasource.dart';
 import 'package:shop_app/features/product/data/models/product_model.dart';
 import 'package:shop_app/features/product/data/models/product_variant_model.dart';
@@ -10,8 +12,9 @@ import 'package:shop_app/features/product/domain/repositories/product_repository
 
 class ProductRepositoryImpl implements ProductRepository {
   final ProductLocalDataSource _localDataSource;
+  final CategoryLocalDataSource _category;
 
-  ProductRepositoryImpl(this._localDataSource);
+  ProductRepositoryImpl(this._localDataSource, this._category);
 
   //==========================================================
   // Product
@@ -25,7 +28,14 @@ class ProductRepositoryImpl implements ProductRepository {
     try {
       final rows = await _localDataSource.getProducts(limit: limit, page: page);
 
-      final products = rows.map((e) => e.toModel().toEntity()).toList();
+      // final products = rows.map((e) => e.toModel().toEntity()).toList();
+
+      final products = await Future.wait(
+        rows.map((e) async {
+          final category = await _category.getCategoryById(e.categoryId);
+          return e.toModel().toEntity(category.toEntity());
+        }).toList(),
+      );
 
       return Success(products);
     } catch (e) {
@@ -37,8 +47,12 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<Result<ProductEntity?>> getProductById(String id) async {
     try {
       final row = await _localDataSource.getProductById(id);
+      if (row == null) {
+        return FailureResult(DatabaseFailure("No id is dound"));
+      }
+      final category = await _category.getCategoryById(row.categoryId);
 
-      return Success(row?.toModel().toEntity());
+      return Success(row.toModel().toEntity(category.toEntity()));
     } catch (e) {
       return FailureResult(DatabaseFailure(e.toString()));
     }
@@ -49,7 +63,12 @@ class ProductRepositoryImpl implements ProductRepository {
     try {
       final rows = await _localDataSource.searchProducts(query);
 
-      final products = rows.map((e) => e.toModel().toEntity()).toList();
+      final products = await Future.wait(
+        rows.map((e) async {
+          final category =await _category.getCategoryById(e.categoryId);
+          return e.toModel().toEntity(category.toEntity());
+        }).toList(),
+      );
 
       return Success(products);
     } catch (e) {
@@ -227,7 +246,6 @@ class ProductRepositoryImpl implements ProductRepository {
         productCompanion,
         variantCompanions,
       );
-      print("Added");
 
       return const Success(null);
     } catch (e) {
@@ -301,8 +319,33 @@ class ProductRepositoryImpl implements ProductRepository {
       );
     }
   }
+
+  @override
+  Future<Result<String>> getBarcode() async {
+    try {
+      final barcode = await _localDataSource.generateUniqueBarcode();
+      return Success(barcode);
+    } catch (e) {
+      print("Failed to generate barcode due to $e");
+      return FailureResult(DatabaseFailure("Failed to generate barcode"));
+    }
+  }
+
+  @override
+  Future<Result<String>> getSku() async {
+    try {
+      final sku = await _localDataSource.generateUniqueSku();
+      return Success(sku);
+    } catch (e) {
+      print("Failed to generate sku due to $e");
+      return FailureResult(DatabaseFailure("Failed to sku barcode"));
+    }
+  }
 }
 
 final productRepositoryProvider = Provider<ProductRepository>(
-  (ref) => ProductRepositoryImpl(ref.watch(productLocalDataSourceProvider)),
+  (ref) => ProductRepositoryImpl(
+    ref.watch(productLocalDataSourceProvider),
+    ref.watch(categoryLocalDataSourceProvider),
+  ),
 );

@@ -9,14 +9,10 @@ class GetProductForEdit {
   final CategoryRepository _categoryRepository;
   final ProductRepository _productRepository;
 
-  const GetProductForEdit(
-    this._categoryRepository,
-    this._productRepository,
-  );
+  const GetProductForEdit(this._categoryRepository, this._productRepository);
 
   Future<Result<ProductForEdit>> call(String productId) async {
-    final productResult =
-        await _productRepository.getProductById(productId);
+    final productResult = await _productRepository.getProductById(productId);
 
     switch (productResult) {
       case FailureResult(:final failure):
@@ -24,24 +20,20 @@ class GetProductForEdit {
 
       case Success<ProductEntity?>(:final data):
         if (data == null) {
-          return FailureResult(
-           DatabaseFailure( "Product not found"),
-          );
+          return FailureResult(DatabaseFailure("Product not found"));
         }
 
-        final categoryResult =
-            await _categoryRepository.getCategoryById(
-          data.categoryId,
+        if (data.category.id == null) {
+          print("Errror in getProductForEdit usecase");
+          return FailureResult(DatabaseFailure("Can;t find category id"));
+        }
+        final categoryResult = await _categoryRepository.getCategoryById(
+          data.category.id!,
         );
-
-        final variantResult =
-            await _productRepository.getVariants(productId);
+        final variantResult = await _productRepository.getVariants(productId);
 
         switch ((categoryResult, variantResult)) {
-          case (
-            Success(data:final category),
-            Success(data:final variants),
-          ):
+          case (Success(data: final category), Success(data: final variants)):
             return Success(
               ProductForEdit(
                 product: data,

@@ -9,13 +9,13 @@ class ProductState {
   final String searchQuery;
   final String? selectedCategoryId;
 
- const  ProductState({
+  const ProductState({
     this.error,
     this.products = const [],
     this.searchQuery = '',
-    this.currentPage=1,
-    this.pageSize=3,
-    this.totalProducts=0,
+    this.currentPage = 1,
+    this.pageSize = 10,
+    this.totalProducts = 0,
     this.selectedCategoryId,
   });
 
@@ -32,7 +32,6 @@ class ProductState {
       selectedCategoryId: selectedCategoryId ?? this.selectedCategoryId,
     );
   }
-  
-  int get totalPages=>(totalProducts/pageSize).ceil();
 
+  int get totalPages => (totalProducts / pageSize).ceil();
 }

@@ -2,7 +2,6 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:shop_app/core/widgets/app_data_table/app_data_table.dart';
 import 'package:shop_app/features/product/domain/entities/product_entitiy.dart';
-import 'package:shop_app/features/product/presentation/widgets/product_action_menu_widget.dart';
 
 class ProductTable extends StatelessWidget {
   const ProductTable({
@@ -27,7 +26,6 @@ class ProductTable extends StatelessWidget {
         DataColumn2(label: Text('Category'), size: ColumnSize.L),
         DataColumn2(label: Text('Description'), size: ColumnSize.L),
         DataColumn2(label: Text('Status'), fixedWidth: 110),
-        DataColumn2(label: Text('Action'), fixedWidth: 70),
       ],
       rows: products.map((product) {
         return DataRow2(
@@ -36,7 +34,7 @@ class ProductTable extends StatelessWidget {
           },
           cells: [
             DataCell(Text(product.name)),
-            DataCell(Text(product.categoryId.toString())),
+            DataCell(Text(product.category.name)),
             DataCell(Text(product.description ?? '-')),
             DataCell(
               Text(
@@ -46,7 +44,6 @@ class ProductTable extends StatelessWidget {
                 ),
               ),
             ),
-            DataCell(ProductActionMenu(isActive: true, onSelected: (value) {})),
           ],
         );
       }).toList(),

@@ -3,11 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shop_app/app/router.dart';
 
 /// Change this date whenever you release a new version.
-final DateTime kExpiryDate = DateTime(2026, 8, 30);
+final DateTime kExpiryDate = DateTime(2026, 12, 20);
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
   final isExpired = DateTime.now().isAfter(kExpiryDate);
 
   runApp(ProviderScope(child: MyApp(isExpired: isExpired)));

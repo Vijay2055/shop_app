@@ -6,6 +6,7 @@ class SaleHistoryState {
   final bool isLoading;
   final bool isLoadingMore;
   final String? error;
+  final String message;
 
   final int page;
   final int totalCount;
@@ -22,8 +23,9 @@ class SaleHistoryState {
     this.page = 1,
     this.totalCount = 0,
     this.hasMore = true,
+    this.message = '',
     this.search = '',
-    this.paymentFilter=PaymentFilter.all
+    this.paymentFilter = PaymentFilter.all,
   });
 
   SaleHistoryState copyWith({
@@ -36,6 +38,7 @@ class SaleHistoryState {
     bool? hasMore,
     String? search,
     PaymentFilter? paymentFilter,
+    String? message,
   }) {
     return SaleHistoryState(
       sales: sales ?? this.sales,
@@ -46,7 +49,8 @@ class SaleHistoryState {
       totalCount: totalCount ?? this.totalCount,
       hasMore: hasMore ?? this.hasMore,
       search: search ?? this.search,
-      paymentFilter: paymentFilter?? this.paymentFilter
+      paymentFilter: paymentFilter ?? this.paymentFilter,
+      message: message ?? this.message,
     );
   }
 }

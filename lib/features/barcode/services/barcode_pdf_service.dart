@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:typed_data';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
@@ -166,6 +165,7 @@ pw.Widget _buildLabel(
 
   // Normal labels
   return pw.Container(
+   
     alignment: pw.Alignment.center,
     padding: const pw.EdgeInsets.all(2),
     child: pw.Column(
@@ -174,18 +174,9 @@ pw.Widget _buildLabel(
         pw.Text(
           item.product.variant,
           textAlign: pw.TextAlign.center,
-          maxLines: 2,
-          style: pw.TextStyle(
-            font: font,
-            fontSize: 8,
-            fontWeight: pw.FontWeight.bold,
-          ),
-        ),
+          maxLines: 1,
 
-        pw.SizedBox(height: 2),
-
-        pw.Text(
-          "Rs ${item.product.sellingPrice.toStringAsFixed(2)}",
+          overflow: pw.TextOverflow.clip,
           style: pw.TextStyle(
             font: font,
             fontSize: 8,
@@ -200,6 +191,15 @@ pw.Widget _buildLabel(
           data: item.product.barcode,
           width: labelWidth * PdfPageFormat.mm * 0.80,
           height: labelHeight * PdfPageFormat.mm * 0.40,
+        ),
+        pw.SizedBox(height: 1),
+        pw.Text(
+          "Rs ${item.product.sellingPrice.toStringAsFixed(0)}",
+          style: pw.TextStyle(
+            font: font,
+            fontSize: 8,
+            fontWeight: pw.FontWeight.bold,
+          ),
         ),
       ],
     ),

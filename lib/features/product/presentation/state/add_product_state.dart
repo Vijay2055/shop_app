@@ -1,3 +1,4 @@
+import 'package:shop_app/features/category/domain/entity/category_entity.dart';
 import 'package:shop_app/features/product/domain/entities/product_varient_draft.dart';
 
 class AddProductState {
@@ -5,7 +6,7 @@ class AddProductState {
 
   final String description;
 
-  final int? selectedCategory;
+  final CategoryEntity? selectedCategory;
 
   final List<ProductVariantDraft> variants;
 
@@ -25,7 +26,7 @@ class AddProductState {
   AddProductState copyWith({
     String? name,
     String? description,
-    int? selectedCategory,
+    CategoryEntity? selectedCategory,
     List<ProductVariantDraft>? variants,
     bool? isSaving,
     String? error,
